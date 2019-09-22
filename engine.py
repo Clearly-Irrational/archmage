@@ -1,6 +1,8 @@
 import tcod
 import tcod.event
 
+from input_handlers import handle_keys
+
 def main():
     #Set the screen variables
     screen_width = 80
@@ -31,33 +33,38 @@ def main():
         #Draw the character on the main console
         tcod.console_put_char(main_con, player_x_coord, player_y_coord, '@', tcod.BKGND_NONE)
         #Overlay the main console onto the root console
-#        tcod.console_blit(main_con, 0, 0, screen_width, screen_height, 0, 0, 0)
-        main_con.blit(dest=root_con)
-#        main_con.blit(root_con, 0, 0, screen_width, screen_height, 0, 0, 1.0, 1.0)
-#        root_con.print(0, 0, 'Hello World!', (255, 255, 255))
+        main_con.blit(dest=root_con, width=screen_width, height=screen_height)
         #Update the console with our changes
         tcod.console_flush()
-
         #Erase the character so it won't smear on the next update
         tcod.console_put_char(main_con, player_x_coord, player_y_coord, ' ', tcod.BKGND_NONE)       
 
-        #Detect and handle events like key presses or closing the window
+        #initialize loop variables
+        action = {'none': True}
+
+        #Detect and handle events
         for event in tcod.event.get():
-            if event.type == "QUIT":
-                end_game = True
-            elif event.type == "KEYDOWN":
-                keydown = True 
-                if event.sym == 97: #a
-                    player_x_coord -= 1
-                elif event.sym == 100: #d
-                    player_x_coord += 1
-                elif event.sym == 115: #s
-                    player_y_coord += 1
-                elif event.sym == 119: #w
-                    player_y_coord -= 1
-                else:
-                    print("Unknown key", event.scancode, event.sym, event.mod, event.repeat)
-                    print(event)
+            if event.type == "QUIT": #Window was closed
+                action = {'exit': True}
+            elif event.type == "KEYDOWN": #A key was depressed
+                action = handle_keys(event)
+
+        move = action.get('move')
+        exit = action.get('exit')
+        error = action.get('error')
+
+        if move:
+            dx, dy = move
+            player_x_coord += dx
+            player_y_coord += dy
+
+        if exit:
+            end_game = True
+
+        if error:
+            error_text = error
+            print("Error detected", error_text)
+
 #            elif event.type == "MOUSEBUTTONDOWN":
 #                mousebuttondown = True
 
