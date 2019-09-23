@@ -1,6 +1,7 @@
 import tcod
 import tcod.event
 
+from entity import Entity
 from input_handlers import handle_keys
 
 def main():
@@ -24,20 +25,20 @@ def main():
     main_con = tcod.console.Console(screen_width, screen_height, screen_order)
 
     #Initialize Player position
-    player_x_coord = int(screen_width/2)
-    player_y_coord = int(screen_height/2)
+    player = Entity(int(screen_width/2), int(screen_height/2), '@', tcod.white)
+    entities = [player]
 
     #Create the console
     end_game = False
     while not end_game:
         #Draw the character on the main console
-        tcod.console_put_char(main_con, player_x_coord, player_y_coord, '@', tcod.BKGND_NONE)
+        tcod.console_put_char(main_con, player.x, player.y, '@', tcod.BKGND_NONE)
         #Overlay the main console onto the root console
         main_con.blit(dest=root_con, width=screen_width, height=screen_height)
         #Update the console with our changes
         tcod.console_flush()
         #Erase the character so it won't smear on the next update
-        tcod.console_put_char(main_con, player_x_coord, player_y_coord, ' ', tcod.BKGND_NONE)       
+        tcod.console_put_char(main_con, player.x, player.y, ' ', tcod.BKGND_NONE)       
 
         #initialize loop variables
         action = {'none': True}
@@ -55,8 +56,7 @@ def main():
 
         if move:
             dx, dy = move
-            player_x_coord += dx
-            player_y_coord += dy
+            player.move(dx, dy)
 
         if exit:
             end_game = True
