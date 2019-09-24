@@ -3,6 +3,7 @@ import tcod.event
 
 from entity import Entity
 from input_handlers import handle_keys
+from render_functions import clear_all, render_all
 
 def main():
     #Set the screen variables
@@ -24,21 +25,20 @@ def main():
     #Create another console where we'll draw before overlaying it on the root
     main_con = tcod.console.Console(screen_width, screen_height, screen_order)
 
-    #Initialize Player position
+    #Initialize entities
     player = Entity(int(screen_width/2), int(screen_height/2), '@', tcod.white)
-    entities = [player]
+    npc = Entity(int(screen_width / 2 - 5), int(screen_height / 2), '@', tcod.yellow)
+    entities = [player, npc]
 
-    #Create the console
+    #Initialize main loop
     end_game = False
     while not end_game:
-        #Draw the character on the main console
-        tcod.console_put_char(main_con, player.x, player.y, '@', tcod.BKGND_NONE)
-        #Overlay the main console onto the root console
-        main_con.blit(dest=root_con, width=screen_width, height=screen_height)
+        #Render all entities on main console and blit them to the root console
+        render_all(main_con, root_con, entities, screen_width, screen_height)
         #Update the console with our changes
         tcod.console_flush()
-        #Erase the character so it won't smear on the next update
-        tcod.console_put_char(main_con, player.x, player.y, ' ', tcod.BKGND_NONE)       
+        #Erase all entities on main console so they won't smear on next update
+        clear_all(main_con, entities)
 
         #initialize loop variables
         action = {'none': True}
