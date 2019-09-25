@@ -35,17 +35,22 @@ def main():
     map_width = screen_width
     map_height = screen_height - 5
 
+    room_max_size = 10
+    room_min_size = 6
+    max_rooms = 30
+
     colors = {
         'dark_wall': tcod.Color(0, 0, 100),
         'dark_ground': tcod.Color(50, 50, 150)
     }
 
     game_map = GameMap(map_width, map_height)
+    game_map.make_map(max_rooms, room_min_size, room_max_size, map_width, map_height, player)
 
     #Initialize main loop
     end_game = False
     while not end_game:
-        #Render all entities on main console and blit them to the root console
+        #Render all entities & tiles on main console and blit them to the root console
         render_all(main_con, root_con, entities, game_map, screen_width, screen_height, colors)
         #Update the console with our changes
         tcod.console_flush()

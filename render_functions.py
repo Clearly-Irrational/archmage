@@ -5,6 +5,7 @@ def render_all(source_con, dest_con, entities_list, game_map, screen_width, scre
     # Draw all the tiles in the game map
     for y in range(game_map.height):
         for x in range(game_map.width):
+            #not sure this logic is correct, what about site blocking but movement non-blocking tiles, example magical darkness?
             wall = game_map.tiles[x][y].block_sight
 
             if wall:
