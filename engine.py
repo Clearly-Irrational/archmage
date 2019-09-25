@@ -3,6 +3,7 @@ import tcod.event
 
 from entity import Entity
 from input_handlers import handle_keys
+from game_map import GameMap
 from render_functions import clear_all, render_all
 
 def main():
@@ -30,11 +31,22 @@ def main():
     npc = Entity(int(screen_width / 2 - 5), int(screen_height / 2), '@', tcod.yellow)
     entities = [player, npc]
 
+    #Initialize the map
+    map_width = screen_width
+    map_height = screen_height - 5
+
+    colors = {
+        'dark_wall': tcod.Color(0, 0, 100),
+        'dark_ground': tcod.Color(50, 50, 150)
+    }
+
+    game_map = GameMap(map_width, map_height)
+
     #Initialize main loop
     end_game = False
     while not end_game:
         #Render all entities on main console and blit them to the root console
-        render_all(main_con, root_con, entities, screen_width, screen_height)
+        render_all(main_con, root_con, entities, game_map, screen_width, screen_height, colors)
         #Update the console with our changes
         tcod.console_flush()
         #Erase all entities on main console so they won't smear on next update
@@ -56,7 +68,9 @@ def main():
 
         if move:
             dx, dy = move
-            player.move(dx, dy)
+            #If nothing is blocking then move the player
+            if not game_map.is_blocked(player.x + dx, player.y + dy):
+                player.move(dx, dy)
 
         if exit:
             end_game = True
