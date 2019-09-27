@@ -5,6 +5,8 @@ from entity import Entity
 from input_handlers import handle_keys
 from game_map import GameMap
 from render_functions import clear_all, render_all
+from caves import Cave
+from dungeons import Dungeon
 
 def main():
     #Set the screen variables
@@ -44,9 +46,14 @@ def main():
         'dark_ground': tcod.Color(50, 50, 150)
     }
 
-    game_map = GameMap(map_width, map_height)
-#    game_map.make_map(max_rooms, room_min_size, room_max_size, map_width, map_height, player)
-    game_map.make_cave(map_width, map_height, player)
+    map_type = 'Cave'
+
+    if map_type == 'Dungeon':
+        game_map = Dungeon(map_width, map_height)
+        game_map.make_map(max_rooms, room_min_size, room_max_size, map_width, map_height, player)
+    elif map_type == 'Cave':
+        game_map = Cave(map_width, map_height)
+        game_map.make_cave(map_width, map_height, player)
 
     #Initialize main loop
     end_game = False
