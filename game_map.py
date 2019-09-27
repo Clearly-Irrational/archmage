@@ -13,10 +13,17 @@ class GameMap:
     #Define the tile states
     def initialize_tiles(self):
         tiles = [[Tile(True) for y in range(self.height)] for x in range(self.width)]
-
         return tiles
 
-    #Generate a traditional dungeon
+    #Determine if a tile is blocked
+    def is_blocked(self, x, y):
+        if self.tiles[x][y].blocked:
+            return True
+        return False
+
+########################################
+#####Generate a traditional dungeon#####
+########################################
     def make_map(self, max_rooms, room_min_size, room_max_size, map_width, map_height, player):
         rooms = []
         num_rooms = 0
@@ -69,38 +76,6 @@ class GameMap:
                 rooms.append(new_room)
                 num_rooms += 1
 
-    #Generate a cellular automata cave system
-    def make_cave(self, map_width, map_height, player):
-        #Generator variables
-        initialy_open_chance = 40
-        number_of_extra_passes = 5
-        wall_count_threshold = 5
-
-        #First pass
-        for y in range(0, map_height):
-            for x in range(0, map_width):
-                if randint(1, 100) <= initialy_open_chance:
-                    self.tiles[x][y].blocked = False
-                    self.tiles[x][y].block_sight = False
-        for loop in range(0, number_of_extra_passes):
-            self.next_pass(map_width, map_height, wall_count_threshold)
-
-        #Place the player
-        placed = False
-        while not placed:
-            rand_x = randint(0, map_width - 1)
-            rand_y = randint(0, map_height - 1)
-            if self.tiles[rand_x][rand_y].blocked == False:
-                player.x = rand_x
-                player.y = rand_y
-                placed = True
-
-    #Determine if a tile is blocked
-    def is_blocked(self, x, y):
-        if self.tiles[x][y].blocked:
-            return True
-        return False
-
     #Generate a walkable rectangular room
     def create_room(self, room):
         #Go through the tiles in the rectangle and make them passable
@@ -124,9 +99,38 @@ class GameMap:
             self.tiles[x][y].blocked = False
             self.tiles[x][y].block_sight = False
 
+##################################################
+#####Generate a cellular automata cave system#####
+##################################################
+    def make_cave(self, map_width, map_height, player):
+        #Generator variables
+        #40, 5, 5, 5 works passably
+        initialy_open_chance = 40
+        number_of_extra_passes = 5
+        wall_create_threshold = 5
+        wall_remove_threshold = 5
+
+        #First pass
+        for y in range(0, map_height):
+            for x in range(0, map_width):
+                if randint(1, 100) <= initialy_open_chance:
+                    self.tiles[x][y].blocked = False
+                    self.tiles[x][y].block_sight = False
+        for loop in range(0, number_of_extra_passes):
+            self.next_pass(map_width, map_height, wall_create_threshold, wall_remove_threshold)
+
+        #Place the player
+        placed = False
+        while not placed:
+            rand_x = randint(0, map_width - 1)
+            rand_y = randint(0, map_height - 1)
+            if self.tiles[rand_x][rand_y].blocked == False:
+                player.x = rand_x
+                player.y = rand_y
+                placed = True
 
     #Next pass
-    def next_pass(self, map_width, map_height, wall_count_threshold):
+    def next_pass(self, map_width, map_height, wall_create_threshold, wall_remove_threshold):
         next_pass = self
         for y in range(0, map_height):
             for x in range(0, map_width):
@@ -139,10 +143,10 @@ class GameMap:
                     for x2 in range(x-left_limit, x+right_limit):
                         if self.tiles[x2][y2].blocked == True:
                             wall_count += 1
-                if wall_count > wall_count_threshold:
+                if wall_count > wall_create_threshold:
                     next_pass.tiles[x][y].blocked = True
                     next_pass.tiles[x][y].block_sight = True
-                elif wall_count < wall_count_threshold:
+                elif wall_count < wall_remove_threshold:
                     next_pass.tiles[x][y].blocked = False
                     next_pass.tiles[x][y].block_sight = False
         self = next_pass
