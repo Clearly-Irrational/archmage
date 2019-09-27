@@ -2,6 +2,7 @@ import tcod
 import tcod.event
 
 from entity import Entity
+from fov_functions import initialize_fov, recompute_fov
 from input_handlers import handle_keys
 from game_map import GameMap
 from render_functions import clear_all, render_all
@@ -41,12 +42,18 @@ def main():
     room_min_size = 6
     max_rooms = 30
 
+    fov_algorithm = 0
+    fov_light_walls = True
+    fov_radius = 10
+
     colors = {
         'dark_wall': tcod.Color(0, 0, 100),
-        'dark_ground': tcod.Color(50, 50, 150)
+        'dark_ground': tcod.Color(50, 50, 150),
+        'light_wall': tcod.Color(130, 110, 50),
+        'light_ground': tcod.Color(200, 180, 50)
     }
 
-    map_type = 'Cave'
+    map_type = 'Dungeon'
 
     if map_type == 'Dungeon':
         game_map = Dungeon(map_width, map_height)
@@ -55,11 +62,21 @@ def main():
         game_map = Cave(map_width, map_height)
         game_map.make_cave(map_width, map_height, player)
 
+    #Initialize FOV and calculate on start
+    fov_recompute = True
+    fov_map = initialize_fov(game_map)
+
     #Initialize main loop
     end_game = False
     while not end_game:
+        #Recomput FOV if necessary
+        if fov_recompute:
+            recompute_fov(fov_map, player.x, player.y, fov_radius, fov_light_walls, fov_algorithm)
+
         #Render all entities & tiles on main console and blit them to the root console
-        render_all(main_con, root_con, entities, game_map, screen_width, screen_height, colors)
+        render_all(main_con, root_con, entities, game_map, fov_map, fov_recompute, screen_width, screen_height, colors)
+        #Reset FOV check
+        fov_recompute = False
         #Update the console with our changes
         tcod.console_flush()
         #Erase all entities on main console so they won't smear on next update
@@ -84,6 +101,8 @@ def main():
             #If nothing is blocking then move the player
             if not game_map.is_blocked(player.x + dx, player.y + dy):
                 player.move(dx, dy)
+            #Recalculate FOV if player moves
+            fov_recompute = True
 
         if exit:
             end_game = True
