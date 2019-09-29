@@ -55,3 +55,9 @@ class Cave(GameMap):
                     next_pass.tiles[x][y].blocked = False
                     next_pass.tiles[x][y].block_sight = False
         self = next_pass
+
+    def next_map(self, player, map_type, constants):
+        entities = [player]
+        self.tiles = self.initialize_tiles()
+        self.make_cave(constants['map_width'], constants['map_height'], player)
+        return entities

@@ -11,9 +11,11 @@ def handle_keys(event):
         return {'move': (-1, 0)}
     elif keypress == 100: #d move right
         return {'move': (1, 0)}
+    elif keypress == 32: #space wait or generate new map in viewer mode
+        return {'wait': True}
     else:
-#        print("Unknown key", "Scancode=", event.scancode, "Symbol=", event.sym, "Mod=", event.mod, "Repeat=", event.repeat)
-#        print(event)
+        print("Unknown key", "Scancode=", event.scancode, "Symbol=", event.sym, "Mod=", event.mod, "Repeat=", event.repeat)
+        print(event)
         return {'Unknown_Key': True}
     #Somehow we got here even though no key was pressed
     return {'error': "handle_keys - no key pressed"}

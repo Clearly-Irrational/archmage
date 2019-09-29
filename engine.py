@@ -4,44 +4,32 @@ import tcod.event
 from entity import Entity
 from fov_functions import initialize_fov, recompute_fov
 from input_handlers import handle_keys
+from initialize import get_constants
 from game_map import GameMap
 from render_functions import clear_all, render_all
 from caves import Cave
 from dungeons import Dungeon
 
 def main():
-    #Set the screen variables
-    screen_width = 80
-    screen_height = 50
-    screen_title = 'archmage alpha'
-    screen_fullscreen = False
-    screen_renderer = tcod.RENDERER_SDL2
-    screen_order = 'F'
-    screen_vsync = True
+    #Set the initial variables
+    constants = get_constants()
 
     #Set the font file and settings
     font_file = 'font_arial10x10.png'
     tcod.console_set_custom_font(font_file, tcod.FONT_TYPE_GREYSCALE | tcod.FONT_LAYOUT_TCOD)
 
     #Create the screen, the root console
-    root_con = tcod.console_init_root(screen_width, screen_height, screen_title, screen_fullscreen, screen_renderer, screen_order, screen_vsync)
+    root_con = tcod.console_init_root(constants['screen_width'], constants['screen_height'], constants['screen_title'], constants['screen_fullscreen'], constants['screen_renderer'], constants['screen_order'], constants['screen_vsync'])
 
     #Create another console where we'll draw before overlaying it on the root
-    main_con = tcod.console.Console(screen_width, screen_height, screen_order)
+    main_con = tcod.console.Console(constants['screen_width'], constants['screen_height'], constants['screen_order'])
 
     #Initialize entities
-    player = Entity(int(screen_width/2), int(screen_height/2), '@', tcod.white)
-    npc = Entity(int(screen_width / 2 - 5), int(screen_height / 2), '@', tcod.yellow)
+    player = Entity(int(constants['screen_width']/2), int(constants['screen_height']/2), '@', tcod.white)
+    npc = Entity(int(constants['screen_width'] / 2 - 5), int(constants['screen_height'] / 2), '@', tcod.yellow)
     entities = [player, npc]
 
     #Initialize the map
-    map_width = screen_width
-    map_height = screen_height - 5
-
-    room_max_size = 10
-    room_min_size = 6
-    max_rooms = 30
-
     fov_algorithm = 0
     fov_light_walls = True
     fov_radius = 10
@@ -53,18 +41,19 @@ def main():
         'light_ground': tcod.Color(200, 180, 50)
     }
 
-    map_type = 'Dungeon'
+    map_type = 'Cave' #Choices: Dungeon, Cave
 
     if map_type == 'Dungeon':
-        game_map = Dungeon(map_width, map_height)
-        game_map.make_map(max_rooms, room_min_size, room_max_size, map_width, map_height, player)
+        game_map = Dungeon(constants['map_width'], constants['map_height'])
+        game_map.make_map(constants['max_rooms'], constants['room_min_size'], constants['room_max_size'], constants['map_width'], constants['map_height'], player)
     elif map_type == 'Cave':
-        game_map = Cave(map_width, map_height)
-        game_map.make_cave(map_width, map_height, player)
+        game_map = Cave(constants['map_width'], constants['map_height'])
+        game_map.make_cave(constants['map_width'], constants['map_height'], player)
 
     #Initialize FOV and calculate on start
     fov_recompute = True
     fov_map = initialize_fov(game_map)
+    game_type = 'viewer' #choices normal, viewer
 
     #Initialize main loop
     end_game = False
@@ -74,7 +63,7 @@ def main():
             recompute_fov(fov_map, player.x, player.y, fov_radius, fov_light_walls, fov_algorithm)
 
         #Render all entities & tiles on main console and blit them to the root console
-        render_all(main_con, root_con, entities, game_map, fov_map, fov_recompute, screen_width, screen_height, colors)
+        render_all(main_con, root_con, entities, game_map, fov_map, fov_recompute, constants['screen_width'], constants['screen_height'], colors, game_type)
         #Reset FOV check
         fov_recompute = False
         #Update the console with our changes
@@ -95,6 +84,7 @@ def main():
         move = action.get('move')
         exit = action.get('exit')
         error = action.get('error')
+        wait = action.get('wait')
 
         if move:
             dx, dy = move
@@ -110,6 +100,13 @@ def main():
         if error:
             error_text = error
             print("Error detected", error_text)
+
+        if wait:
+            if game_type == 'viewer':
+                entities = game_map.next_map(player, map_type, constants)
+                fov_map = initialize_fov(game_map)
+                fov_recompute = True
+                main_con.clear()
 
 #            elif event.type == "MOUSEBUTTONDOWN":
 #                mousebuttondown = True

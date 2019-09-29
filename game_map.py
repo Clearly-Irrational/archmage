@@ -17,3 +17,9 @@ class GameMap:
         if self.tiles[x][y].blocked:
             return True
         return False
+
+#    def next_map(self, player, map_type):
+#        entities = [player]
+#        self.tiles = self.initialize_tiles()
+#
+#        return entities

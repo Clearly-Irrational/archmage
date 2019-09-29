@@ -1,15 +1,15 @@
 import tcod
 
 #Draw all entities in the list
-def render_all(source_con, dest_con, entities_list, game_map, fov_map, fov_recompute, screen_width, screen_height, colors):
+def render_all(source_con, dest_con, entities_list, game_map, fov_map, fov_recompute, screen_width, screen_height, colors, game_type):
     if fov_recompute:
         # Draw all the tiles in the game map
         for y in range(game_map.height):
             for x in range(game_map.width):
-                #not sure this logic is correct, what about site blocking but movement non-blocking tiles, example magical darkness?
                 visible = tcod.map_is_in_fov(fov_map, x, y)
+                #not sure this logic is correct, what about sight blocking but movement non-blocking tiles, example magical darkness?
                 wall = game_map.tiles[x][y].block_sight
-
+                #If it's visible make it light colored and mark explored
                 if visible:
                     if wall:
                         tcod.console_set_char_background(source_con, x, y, colors.get('light_wall'), tcod.BKGND_SET)
@@ -17,7 +17,8 @@ def render_all(source_con, dest_con, entities_list, game_map, fov_map, fov_recom
                         tcod.console_set_char_background(source_con, x, y, colors.get('light_ground'), tcod.BKGND_SET)
                     #Mark tiles as explored
                     game_map.tiles[x][y].explored = True
-                elif game_map.tiles[x][y].explored:
+                #If it is not visible but is explored make it dark colored
+                elif game_map.tiles[x][y].explored or game_type == 'viewer':
                     if wall:
                         tcod.console_set_char_background(source_con, x, y, colors.get('dark_wall'), tcod.BKGND_SET)
                     else:
