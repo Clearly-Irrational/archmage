@@ -9,6 +9,7 @@ def render_all(source_con, dest_con, entities_list, game_map, fov_map, fov_recom
                 visible = tcod.map_is_in_fov(fov_map, x, y)
                 #not sure this logic is correct, what about sight blocking but movement non-blocking tiles, example magical darkness?
                 wall = game_map.tiles[x][y].block_sight
+                floodfill_done = game_map.tiles[x][y].floodfilled
                 #If it's visible make it light colored and mark explored
                 if visible:
                     if wall:
@@ -21,6 +22,8 @@ def render_all(source_con, dest_con, entities_list, game_map, fov_map, fov_recom
                 elif game_map.tiles[x][y].explored or game_type == 'viewer':
                     if wall:
                         tcod.console_set_char_background(source_con, x, y, colors.get('dark_wall'), tcod.BKGND_SET)
+                    elif floodfill_done:
+                        tcod.console_set_char_background(source_con, x, y, colors.get('purple_fill'), tcod.BKGND_SET)
                     else:
                         tcod.console_set_char_background(source_con, x, y, colors.get('dark_ground'), tcod.BKGND_SET)
 
