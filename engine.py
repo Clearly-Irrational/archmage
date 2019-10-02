@@ -42,7 +42,7 @@ def main():
         'purple_fill': tcod.Color(128, 0, 128)
     }
 
-    map_type = 'Cave' #Choices: Dungeon, Cave
+    map_type = 'Dungeon' #Choices: Dungeon, Cave
 
     if map_type == 'Dungeon':
         game_map = Dungeon(constants['map_width'], constants['map_height'])

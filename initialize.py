@@ -1,9 +1,9 @@
 import tcod
 
 def get_constants():
-    screen_width = 80
-    screen_height = 50
-    screen_title = 'archmage alpha'
+    screen_width = 160 #Default 80
+    screen_height = 100 #Default 50
+    screen_title = 'Archmage - The True Path'
     screen_fullscreen = False
     screen_renderer = tcod.RENDERER_SDL2
     screen_order = 'F'
@@ -11,9 +11,9 @@ def get_constants():
 
     map_width = screen_width
     map_height = screen_height - 5
-    room_max_size = 10
-    room_min_size = 6
-    max_rooms = 30
+    room_max_size = 16
+    room_min_size = 4
+    max_rooms = 180
 
     constants = {
         'screen_width': screen_width,
