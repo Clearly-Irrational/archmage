@@ -1,7 +1,8 @@
 import tcod
 
 #Draw all entities in the list
-def render_all(source_con, dest_con, entities_list, game_map, fov_map, fov_recompute, screen_width, screen_height, colors, game_type):
+def render_all(source_con, dest_con, entities_list, game_map, fov_map, fov_recompute, screen_width, screen_height, colors, game_type, interface_skin):
+    floor_char = chr(298) #256+32+10 (11th char, third row is the empty square)
     if fov_recompute:
         # Draw all the tiles in the game map
         for y in range(game_map.height):
@@ -15,7 +16,10 @@ def render_all(source_con, dest_con, entities_list, game_map, fov_map, fov_recom
                     if wall:
                         tcod.console_set_char_background(source_con, x, y, colors.get('light_wall'), tcod.BKGND_SET)
                     else:
-                        tcod.console_set_char_background(source_con, x, y, colors.get('light_ground'), tcod.BKGND_SET)
+                        if interface_skin == 'Tutorial':
+                            tcod.console_set_char_background(source_con, x, y, colors.get('light_ground'), tcod.BKGND_SET)
+                        elif interface_skin == 'Graph':
+                            tcod.console_put_char_ex(source_con, x, y, floor_char, colors.get('console_white'), colors.get('light_ground'))
                     #Mark tiles as explored
                     game_map.tiles[x][y].explored = True
                 #If it is not visible but is explored make it dark colored
@@ -25,7 +29,10 @@ def render_all(source_con, dest_con, entities_list, game_map, fov_map, fov_recom
                     elif floodfill_done:
                         tcod.console_set_char_background(source_con, x, y, colors.get('purple_fill'), tcod.BKGND_SET)
                     else:
-                        tcod.console_set_char_background(source_con, x, y, colors.get('dark_ground'), tcod.BKGND_SET)
+                        if interface_skin == 'Tutorial':
+                            tcod.console_set_char_background(source_con, x, y, colors.get('dark_ground'), tcod.BKGND_SET)
+                        elif interface_skin == 'Graph':
+                            tcod.console_put_char_ex(source_con, x, y, floor_char, colors.get('dark_ground'), colors.get('console_white'))
 
     #Draw all entities in the list
     for entity in entities_list:

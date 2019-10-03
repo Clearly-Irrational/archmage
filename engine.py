@@ -17,6 +17,8 @@ def main():
     #Set the font file and settings
     font_file = 'font_arial10x10.png'
     tcod.console_set_custom_font(font_file, tcod.FONT_TYPE_GREYSCALE | tcod.FONT_LAYOUT_TCOD)
+    tcod.console_map_ascii_codes_to_font(256, 32, 0, 1)  #map all characters in 2nd row
+    tcod.console_map_ascii_codes_to_font(256+32, 32, 0, 2)  #map all characters in 3rd row
 
     #Create the screen, the root console
     root_con = tcod.console_init_root(constants['screen_width'], constants['screen_height'], constants['screen_title'], constants['screen_fullscreen'], constants['screen_renderer'], constants['screen_order'], constants['screen_vsync'])
@@ -25,7 +27,7 @@ def main():
     main_con = tcod.console.Console(constants['screen_width'], constants['screen_height'], constants['screen_order'])
 
     #Initialize entities
-    player = Entity(int(constants['screen_width']/2), int(constants['screen_height']/2), '@', tcod.white)
+    player = Entity(int(constants['screen_width']/2), int(constants['screen_height']/2), '@', tcod.black)
     npc = Entity(int(constants['screen_width'] / 2 - 5), int(constants['screen_height'] / 2), '@', tcod.yellow)
     entities = [player, npc]
 
@@ -34,13 +36,27 @@ def main():
     fov_light_walls = True
     fov_radius = 10
 
-    colors = {
-        'dark_wall': tcod.Color(0, 0, 100),
-        'dark_ground': tcod.Color(50, 50, 150),
-        'light_wall': tcod.Color(130, 110, 50),
-        'light_ground': tcod.Color(200, 180, 50),
-        'purple_fill': tcod.Color(128, 0, 128)
-    }
+    interface_skin = 'Graph' #Choices: Graph, Tutorial
+
+    if interface_skin == 'Graph':
+        colors = {
+            #steelblue (70, 130, 180)
+            'dark_wall': tcod.Color(70, 130, 180),
+            'dark_ground': tcod.Color(70, 130, 180),
+            'light_wall': tcod.Color(130, 110, 50),
+            'light_ground': tcod.Color(200, 180, 50),
+            'purple_fill': tcod.Color(128, 0, 128),
+            'console_white': tcod.Color(255, 255, 255)
+        }
+    elif interface_skin == 'Tutorial':
+        colors = {
+            'dark_wall': tcod.Color(0, 0, 100),
+            'dark_ground': tcod.Color(50, 50, 150),
+            'light_wall': tcod.Color(130, 110, 50),
+            'light_ground': tcod.Color(200, 180, 50),
+            'purple_fill': tcod.Color(128, 0, 128),
+            'console_white': tcod.Color(255, 255, 255)
+        }
 
     map_type = 'Dungeon' #Choices: Dungeon, Cave
 
@@ -54,7 +70,7 @@ def main():
     #Initialize FOV and calculate on start
     fov_recompute = True
     fov_map = initialize_fov(game_map)
-    game_type = 'viewer' #choices normal, viewer
+    game_type = 'normal' #choices normal, viewer
 
     #Initialize main loop
     end_game = False
@@ -64,7 +80,7 @@ def main():
             recompute_fov(fov_map, player.x, player.y, fov_radius, fov_light_walls, fov_algorithm)
 
         #Render all entities & tiles on main console and blit them to the root console
-        render_all(main_con, root_con, entities, game_map, fov_map, fov_recompute, constants['screen_width'], constants['screen_height'], colors, game_type)
+        render_all(main_con, root_con, entities, game_map, fov_map, fov_recompute, constants['screen_width'], constants['screen_height'], colors, game_type, interface_skin)
         #Reset FOV check
         fov_recompute = False
         #Update the console with our changes
