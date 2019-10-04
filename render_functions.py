@@ -1,7 +1,30 @@
 import tcod
 
 #Draw all entities in the list
-def render_all(source_con, dest_con, entities_list, game_map, fov_map, fov_recompute, screen_width, screen_height, colors, game_type, interface_skin):
+def render_all(source_con, dest_con, entities_list, game_map, fov_map, fov_recompute, screen_width, screen_height, colors, game_type, interface_skin, indoors):
+    if indoors == True:
+        render_all_indoors(source_con, dest_con, entities_list, game_map, fov_map, fov_recompute, screen_width, screen_height, colors, game_type, interface_skin)
+    if indoors == False:
+        render_all_outdoors(source_con, dest_con, entities_list, game_map, fov_map, fov_recompute, screen_width, screen_height, colors, game_type, interface_skin)
+
+#Clear all entities in the list
+def clear_all(source_con, entities_list):
+    for entity in entities_list:
+        clear_entity(source_con, entity)
+
+#Draw a single entity on the source console
+def draw_entity(source_con, entity, fov_map):
+    if tcod.map_is_in_fov(fov_map, entity.x, entity.y):
+        #Set the entity color
+        source_con.default_fg = (entity.color)
+        #Draw this entity on the source console
+        tcod.console_put_char(source_con, entity.x, entity.y, entity.char, tcod.BKGND_NONE)
+
+#Erase the entity so it won't smear on the next update
+def clear_entity(source_con, entity):
+    tcod.console_put_char(source_con, entity.x, entity.y, ' ', tcod.BKGND_NONE)
+
+def render_all_indoors(source_con, dest_con, entities_list, game_map, fov_map, fov_recompute, screen_width, screen_height, colors, game_type, interface_skin):
     floor_char = chr(298) #256+32+10 (11th char, third row is the empty square)
     if fov_recompute:
         # Draw all the tiles in the game map
@@ -41,19 +64,45 @@ def render_all(source_con, dest_con, entities_list, game_map, fov_map, fov_recom
     #Overlay the source console onto the destination console
     source_con.blit(dest=dest_con, width=screen_width, height=screen_height)
 
-#Clear all entities in the list
-def clear_all(source_con, entities_list):
+def render_all_outdoors(source_con, dest_con, entities_list, game_map, fov_map, fov_recompute, screen_width, screen_height, colors, game_type, interface_skin):
+    floor_char = chr(298) #256+32+10 (11th char, third row is the empty square)
+    if fov_recompute:
+        # Draw all the tiles in the game map
+        for y in range(game_map.height):
+            for x in range(game_map.width):
+                visible = tcod.map_is_in_fov(fov_map, x, y)
+                #If it's visible make it light colored and mark explored
+                if visible:
+                    if interface_skin == 'Tutorial':
+                        if game_map.tiles[x][y].terrain == 0:
+                            tcod.console_set_char_background(source_con, x, y, colors.get('light_water_blue'), tcod.BKGND_SET)
+                        if game_map.tiles[x][y].terrain == 1:
+                            tcod.console_set_char_background(source_con, x, y, colors.get('light_plains_brown'), tcod.BKGND_SET)
+                        if game_map.tiles[x][y].terrain == 2:
+                            tcod.console_set_char_background(source_con, x, y, colors.get('light_forest_green'), tcod.BKGND_SET)
+                        if game_map.tiles[x][y].terrain == 3:
+                            tcod.console_set_char_background(source_con, x, y, colors.get('light_mountain_grey'), tcod.BKGND_SET)
+                    elif interface_skin == 'Graph':
+                        tcod.console_put_char_ex(source_con, x, y, floor_char, colors.get('console_white'), colors.get('light_ground'))
+                    #Mark tiles as explored
+                    game_map.tiles[x][y].explored = True
+                #If it is not visible but is explored make it dark colored
+                elif game_map.tiles[x][y].explored or game_type == 'viewer':
+                    if interface_skin == 'Tutorial':
+                        if game_map.tiles[x][y].terrain == 0:
+                            tcod.console_set_char_background(source_con, x, y, colors.get('dark_water_blue'), tcod.BKGND_SET)
+                        if game_map.tiles[x][y].terrain == 1:
+                            tcod.console_set_char_background(source_con, x, y, colors.get('dark_plains_brown'), tcod.BKGND_SET)
+                        if game_map.tiles[x][y].terrain == 2:
+                            tcod.console_set_char_background(source_con, x, y, colors.get('dark_forest_green'), tcod.BKGND_SET)
+                        if game_map.tiles[x][y].terrain == 3:
+                            tcod.console_set_char_background(source_con, x, y, colors.get('dark_mountain_grey'), tcod.BKGND_SET)
+                    elif interface_skin == 'Graph':
+                        tcod.console_put_char_ex(source_con, x, y, floor_char, colors.get('dark_ground'), colors.get('console_white'))
+
+    #Draw all entities in the list
     for entity in entities_list:
-        clear_entity(source_con, entity)
+        draw_entity(source_con, entity, fov_map)
 
-#Draw a single entity on the source console
-def draw_entity(source_con, entity, fov_map):
-    if tcod.map_is_in_fov(fov_map, entity.x, entity.y):
-        #Set the entity color
-        source_con.default_fg = (entity.color)
-        #Draw this entity on the source console
-        tcod.console_put_char(source_con, entity.x, entity.y, entity.char, tcod.BKGND_NONE)
-
-#Erase the entity so it won't smear on the next update
-def clear_entity(source_con, entity):
-    tcod.console_put_char(source_con, entity.x, entity.y, ' ', tcod.BKGND_NONE)
+    #Overlay the source console onto the destination console
+    source_con.blit(dest=dest_con, width=screen_width, height=screen_height)
