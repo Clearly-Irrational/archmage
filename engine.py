@@ -1,8 +1,9 @@
 import tcod
 import tcod.event
 
-from entity import Entity
+from entity import Entity, get_blocking_entities_at_location
 from fov_functions import initialize_fov, recompute_fov
+from game_states import GameStates
 from input_handlers import handle_keys
 from initialize import get_constants
 from game_map import GameMap
@@ -28,9 +29,10 @@ def main():
     main_con = tcod.console.Console(constants['screen_width'], constants['screen_height'], constants['screen_order'])
 
     #Initialize entities
-    player = Entity(int(constants['screen_width']/2), int(constants['screen_height']/2), '@', tcod.black)
-    npc = Entity(int(constants['screen_width'] / 2 - 5), int(constants['screen_height'] / 2), '@', tcod.yellow)
-    entities = [player, npc]
+#    player = Entity(int(constants['screen_width']/2), int(constants['screen_height']/2), '@', tcod.black)
+#    npc = Entity(int(constants['screen_width'] / 2 - 5), int(constants['screen_height'] / 2), '@', tcod.yellow)
+    player = Entity(0, 0, '@', tcod.black, 'Player', blocks=True)
+    entities = [player]
 
     #Initialize the map
     fov_algorithm = 0
@@ -51,12 +53,13 @@ def main():
         }
     elif interface_skin == 'Tutorial':
         colors = {
+            #indoors
             'dark_wall': tcod.Color(0, 0, 100),
             'dark_ground': tcod.Color(50, 50, 150),
             'light_wall': tcod.Color(130, 110, 50),
             'light_ground': tcod.Color(200, 180, 50),
             'purple_fill': tcod.Color(128, 0, 128),
-            'console_white': tcod.Color(255, 255, 255),
+            #outdoors
             'light_water_blue': tcod.Color(0, 0, 255),
             'light_plains_brown': tcod.Color(127, 101, 63),
             'light_forest_green': tcod.Color(0, 255, 0),
@@ -64,15 +67,19 @@ def main():
             'dark_water_blue': tcod.Color(0, 0, 191),
             'dark_plains_brown': tcod.Color(94, 75, 47),
             'dark_forest_green': tcod.Color(0, 191, 0),
-            'dark_mountain_grey': tcod.Color(95, 95, 95)
+            'dark_mountain_grey': tcod.Color(95, 95, 95),
+            #Entities
+            'console_white': tcod.Color(255, 255, 255),
+            'orc_green': tcod.Color(63, 127, 63),
+            'troll_green': tcod.Color(0, 127, 0)
         }
 
-    map_type = 'Cave' #Choices: Dungeon, Cave, World
+    map_type = 'Dungeon' #Choices: Dungeon, Cave, World
 
     if map_type == 'Dungeon':
         indoors = True
         game_map = Dungeon(constants['map_width'], constants['map_height'])
-        game_map.make_map(constants['max_rooms'], constants['room_min_size'], constants['room_max_size'], constants['map_width'], constants['map_height'], player)
+        game_map.make_map(constants['max_rooms'], constants['room_min_size'], constants['room_max_size'], constants['map_width'], constants['map_height'], player, entities, constants['max_monsters_per_room'])
     elif map_type == 'Cave':
         indoors = True
         game_map = Cave(constants['map_width'], constants['map_height'])
@@ -85,9 +92,10 @@ def main():
     #Initialize FOV and calculate on start
     fov_recompute = True
     fov_map = initialize_fov(game_map)
-    game_type = 'normal' #choices normal, viewer
+    game_type = 'viewer' #choices normal, viewer
 
     #Initialize main loop
+    game_state = GameStates.PLAYERS_TURN
     end_game = False
     while not end_game:
         #Recomput FOV if necessary
@@ -118,13 +126,21 @@ def main():
         error = action.get('error')
         wait = action.get('wait')
 
-        if move:
+        if move and game_state == GameStates.PLAYERS_TURN:
             dx, dy = move
-            #If nothing is blocking then move the player
-            if not game_map.is_blocked(player.x + dx, player.y + dy):
-                player.move(dx, dy)
-            #Recalculate FOV if player moves
-            fov_recompute = True
+            destination_x = player.x + dx
+            destination_y = player.y + dy
+            #If no terrain is blocking then try to move the player
+            if not game_map.is_blocked(destination_x, destination_y):
+                #If no entity is blocking then move the player
+                target = get_blocking_entities_at_location(entities, destination_x, destination_y)
+                if target:
+                    print('You kick the ' + target.name + ' in the shins, much to its annoyance!')
+                else:
+                    player.move(dx, dy)
+                    #Recalculate FOV if player moves
+                    fov_recompute = True
+                game_state = GameStates.ENEMY_TURN
 
         if exit:
             end_game = True
@@ -135,10 +151,17 @@ def main():
 
         if wait:
             if game_type == 'viewer':
-                entities = game_map.next_map(player, map_type, constants)
+                entities = game_map.next_map(player, map_type, constants, entities)
                 fov_map = initialize_fov(game_map)
                 fov_recompute = True
-                main_con.clear()
+                main_con.clear(fg=(0, 0, 0))
+
+        if game_state == GameStates.ENEMY_TURN:
+            for entity in entities:
+                if entity != player:
+                    #print('The ' + entity.name + ' ponders the meaning of its existence.')
+                    stuff = 0
+            game_state = GameStates.PLAYERS_TURN
 
 #            elif event.type == "MOUSEBUTTONDOWN":
 #                mousebuttondown = True

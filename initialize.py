@@ -14,6 +14,7 @@ def get_constants():
     room_max_size = 16
     room_min_size = 4
     max_rooms = 180
+    max_monsters_per_room = 3
 
     constants = {
         'screen_width': screen_width,
@@ -27,7 +28,8 @@ def get_constants():
         'map_height': map_height,
         'room_max_size': room_max_size,
         'room_min_size': room_min_size,
-        'max_rooms': max_rooms
+        'max_rooms': max_rooms,
+        'max_monsters_per_room': max_monsters_per_room
     }
 
     return constants

@@ -9,7 +9,7 @@ class Dungeon(GameMap):
 ########################################
 #####Generate a traditional dungeon#####
 ########################################
-    def make_map(self, max_rooms, room_min_size, room_max_size, map_width, map_height, player):
+    def make_map(self, max_rooms, room_min_size, room_max_size, map_width, map_height, player, entities, max_monsters_per_area):
         rooms = []
         num_rooms = 0
 
@@ -49,6 +49,8 @@ class Dungeon(GameMap):
                         #Build a tunnel between rooms
                         self.build_tunnel(prev_x, prev_y, new_x, new_y) 
 
+                #Add monsters
+                self.place_entities(new_room, entities, max_monsters_per_area)
                 # finally, append the new room to the list
                 rooms.append(new_room)
                 num_rooms += 1
@@ -136,8 +138,8 @@ class Dungeon(GameMap):
                         self.create_v_tunnel(mid_y, new_y, new_x)
                         self.create_h_tunnel(prev_x, mid_x, prev_y)
 
-    def next_map(self, player, map_type, constants):
+    def next_map(self, player, map_type, constants, entities):
         entities = [player]
         self.tiles = self.initialize_tiles()
-        self.make_map(constants['max_rooms'], constants['room_min_size'], constants['room_max_size'], constants['map_width'], constants['map_height'], player)
+        self.make_map(constants['max_rooms'], constants['room_min_size'], constants['room_max_size'], constants['map_width'], constants['map_height'], player, entities, constants['max_monsters_per_room'])
         return entities
