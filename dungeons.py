@@ -1,9 +1,11 @@
+import tcod #remove later and abstract monster colors
 from random import randint
 from operator import methodcaller
 
 from rectangle import Rect
 from tile import Tile
 from game_map import GameMap
+from entity import Entity
 
 class Dungeon(GameMap):
 ########################################
@@ -143,3 +145,20 @@ class Dungeon(GameMap):
         self.tiles = self.initialize_tiles()
         self.make_map(constants['max_rooms'], constants['room_min_size'], constants['room_max_size'], constants['map_width'], constants['map_height'], player, entities, constants['max_monsters_per_room'])
         return entities
+
+    def place_entities(self, area, entities, max_monsters_per_area):
+        # Get a random number of monsters
+        number_of_monsters = randint(0, max_monsters_per_area)
+
+        for i in range(0, number_of_monsters):
+            # Choose a random location in the area
+            x = randint(area.x1 + 1, area.x2 - 1)
+            y = randint(area.y1 + 1, area.y2 - 1)
+
+            if not any([entity for entity in entities if entity.x == x and entity.y == y]):
+                if randint(0, 100) < 80:
+                    monster = Entity(x, y, 'o', tcod.desaturated_green, 'Orc', blocks=True)
+                else:
+                    monster = Entity(x, y, 'T', tcod.darker_green, 'Troll', blocks=True)
+
+                entities.append(monster)

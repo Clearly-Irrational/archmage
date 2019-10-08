@@ -11,10 +11,18 @@ def get_constants():
 
     map_width = screen_width
     map_height = screen_height - 5
+
+    #Dungeons
     room_max_size = 16
     room_min_size = 4
     max_rooms = 180
     max_monsters_per_room = 3
+
+    #Caves
+    max_monsters_per_cave = 5
+
+    #World
+    max_monsters_per_spawn = 8
 
     constants = {
         'screen_width': screen_width,
@@ -29,7 +37,9 @@ def get_constants():
         'room_max_size': room_max_size,
         'room_min_size': room_min_size,
         'max_rooms': max_rooms,
-        'max_monsters_per_room': max_monsters_per_room
+        'max_monsters_per_room': max_monsters_per_room,
+        'max_monsters_per_cave': max_monsters_per_cave,
+        'max_monsters_per_spawn': max_monsters_per_spawn
     }
 
     return constants

@@ -74,7 +74,7 @@ def main():
             'troll_green': tcod.Color(0, 127, 0)
         }
 
-    map_type = 'Dungeon' #Choices: Dungeon, Cave, World
+    map_type = 'World' #Choices: Dungeon, Cave, World
 
     if map_type == 'Dungeon':
         indoors = True
@@ -83,16 +83,17 @@ def main():
     elif map_type == 'Cave':
         indoors = True
         game_map = Cave(constants['map_width'], constants['map_height'])
-        game_map.make_cave(constants['map_width'], constants['map_height'], player)
+        game_map.make_cave(constants['map_width'], constants['map_height'], player, entities, constants['max_monsters_per_cave'])
     elif map_type == 'World':
         indoors = False
         game_map = World(constants['map_width'], constants['map_height'])
-        game_map.make_world(constants['map_width'], constants['map_height'], player)
+        game_map.make_world(constants['map_width'], constants['map_height'], player, entities, constants['max_monsters_per_spawn'])
 
     #Initialize FOV and calculate on start
     fov_recompute = True
     fov_map = initialize_fov(game_map)
     game_type = 'viewer' #choices normal, viewer
+
 
     #Initialize main loop
     game_state = GameStates.PLAYERS_TURN
