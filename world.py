@@ -24,18 +24,22 @@ class World(GameMap):
         lacunarity = 2.0
         seed = randint(0, 1024)
 
+        water_threshold = -0.2
+        plains_threshold = 0.0
+        forest_threshold = 0.2
+
         world_height = [[0
             for y in range(0, map_height)]
                 for x in range(0, map_width)]
 
         for y in range(0, map_height):
             for x in range(0, map_width):
-                world_height[x][y] = noise.pnoise2(x/scale, y/scale, octaves=octaves, persistence=persistence, lacunarity=lacunarity, repeatx=map_width, repeaty=map_height, base=seed)
-                if world_height[x][y] < -0.2:
+                world_height[x][y] = noise.snoise2(x/scale, y/scale, octaves=octaves, persistence=persistence, lacunarity=lacunarity, repeatx=map_width, repeaty=map_height, base=seed)
+                if world_height[x][y] < water_threshold:
                     self.tiles[x][y].terrain = 0 #Water
-                elif world_height[x][y] < 0.0:
+                elif world_height[x][y] < plains_threshold:
                     self.tiles[x][y].terrain = 1 #Plains
-                elif world_height[x][y] < 0.2:
+                elif world_height[x][y] < forest_threshold:
                     self.tiles[x][y].terrain = 2 #Forests
                 else:
                     self.tiles[x][y].terrain = 3 #Mountains
