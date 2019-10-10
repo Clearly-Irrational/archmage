@@ -78,14 +78,16 @@ def render_all_outdoors(source_con, dest_con, entities_list, game_map, fov_map, 
                         if game_map.tiles[x][y].terrain == 0:
                             tcod.console_set_char_background(source_con, x, y, colors.get('light_water'), tcod.BKGND_SET)
                         if game_map.tiles[x][y].terrain == 1:
-                            tcod.console_set_char_background(source_con, x, y, colors.get('light_sand'), tcod.BKGND_SET)
+                            tcod.console_set_char_background(source_con, x, y, colors.get('light_shallows'), tcod.BKGND_SET)
                         if game_map.tiles[x][y].terrain == 2:
-                            tcod.console_set_char_background(source_con, x, y, colors.get('light_plains'), tcod.BKGND_SET)
+                            tcod.console_set_char_background(source_con, x, y, colors.get('light_sand'), tcod.BKGND_SET)
                         if game_map.tiles[x][y].terrain == 3:
-                            tcod.console_set_char_background(source_con, x, y, colors.get('light_hills'), tcod.BKGND_SET)
+                            tcod.console_set_char_background(source_con, x, y, colors.get('light_plains'), tcod.BKGND_SET)
                         if game_map.tiles[x][y].terrain == 4:
-                            tcod.console_set_char_background(source_con, x, y, colors.get('light_mountain'), tcod.BKGND_SET)
+                            tcod.console_set_char_background(source_con, x, y, colors.get('light_hills'), tcod.BKGND_SET)
                         if game_map.tiles[x][y].terrain == 5:
+                            tcod.console_set_char_background(source_con, x, y, colors.get('light_mountain'), tcod.BKGND_SET)
+                        if game_map.tiles[x][y].terrain == 6:
                             tcod.console_set_char_background(source_con, x, y, colors.get('light_snow'), tcod.BKGND_SET)
                     elif interface_skin == 'Graph':
                         tcod.console_put_char_ex(source_con, x, y, floor_char, colors.get('console_white'), colors.get('light_ground'))
@@ -97,14 +99,16 @@ def render_all_outdoors(source_con, dest_con, entities_list, game_map, fov_map, 
                         if game_map.tiles[x][y].terrain == 0:
                             tcod.console_set_char_background(source_con, x, y, colors.get('dark_water'), tcod.BKGND_SET)
                         if game_map.tiles[x][y].terrain == 1:
-                            tcod.console_set_char_background(source_con, x, y, colors.get('dark_sand'), tcod.BKGND_SET)
+                            tcod.console_set_char_background(source_con, x, y, colors.get('dark_shallows'), tcod.BKGND_SET)
                         if game_map.tiles[x][y].terrain == 2:
-                            tcod.console_set_char_background(source_con, x, y, colors.get('dark_plains'), tcod.BKGND_SET)
+                            tcod.console_set_char_background(source_con, x, y, colors.get('dark_sand'), tcod.BKGND_SET)
                         if game_map.tiles[x][y].terrain == 3:
-                            tcod.console_set_char_background(source_con, x, y, colors.get('dark_hills'), tcod.BKGND_SET)
+                            tcod.console_set_char_background(source_con, x, y, colors.get('dark_plains'), tcod.BKGND_SET)
                         if game_map.tiles[x][y].terrain == 4:
-                            tcod.console_set_char_background(source_con, x, y, colors.get('dark_mountain'), tcod.BKGND_SET)
+                            tcod.console_set_char_background(source_con, x, y, colors.get('dark_hills'), tcod.BKGND_SET)
                         if game_map.tiles[x][y].terrain == 5:
+                            tcod.console_set_char_background(source_con, x, y, colors.get('dark_mountain'), tcod.BKGND_SET)
+                        if game_map.tiles[x][y].terrain == 6:
                             tcod.console_set_char_background(source_con, x, y, colors.get('dark_snow'), tcod.BKGND_SET)
                     elif interface_skin == 'Graph':
                         tcod.console_put_char_ex(source_con, x, y, floor_char, colors.get('dark_ground'), colors.get('console_white'))

@@ -24,7 +24,8 @@ class World(GameMap):
         lacunarity = 2.0
         seed = randint(0, 1024)
 
-        water_threshold = -0.2
+        water_threshold = -0.25
+        shallows_threshold = -0.2
         sand_threshold = -0.1775
         plains_threshold = 0.1
         hills_threshold = 0.3
@@ -40,15 +41,17 @@ class World(GameMap):
                 if world_height[x][y] < water_threshold:
                     self.tiles[x][y].terrain = 0 #Water
                 elif world_height[x][y] < sand_threshold:
-                    self.tiles[x][y].terrain = 1 #sand
+                    self.tiles[x][y].terrain = 1 #Shallows
+                elif world_height[x][y] < sand_threshold:
+                    self.tiles[x][y].terrain = 2 #sand
                 elif world_height[x][y] < plains_threshold:
-                    self.tiles[x][y].terrain = 2 #Plains
+                    self.tiles[x][y].terrain = 3 #Plains
                 elif world_height[x][y] < hills_threshold:
-                    self.tiles[x][y].terrain = 3 #Hills
+                    self.tiles[x][y].terrain = 4 #Hills
                 elif world_height[x][y] < mountain_threshold:
-                    self.tiles[x][y].terrain = 4 #Mountains
+                    self.tiles[x][y].terrain = 5 #Mountains
                 else:
-                    self.tiles[x][y].terrain = 5 #Snow
+                    self.tiles[x][y].terrain = 6 #Snow
                 self.tiles[x][y].blocked = False
                 self.tiles[x][y].block_sight = False
 #                if world_height[x][y] < -0.2:
