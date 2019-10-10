@@ -25,8 +25,10 @@ class World(GameMap):
         seed = randint(0, 1024)
 
         water_threshold = -0.2
-        plains_threshold = 0.0
-        forest_threshold = 0.2
+        sand_threshold = -0.1775
+        plains_threshold = 0.1
+        hills_threshold = 0.3
+        mountain_threshold = 0.425
 
         world_height = [[0
             for y in range(0, map_height)]
@@ -37,12 +39,16 @@ class World(GameMap):
                 world_height[x][y] = noise.snoise2(x/scale, y/scale, octaves=octaves, persistence=persistence, lacunarity=lacunarity, repeatx=map_width, repeaty=map_height, base=seed)
                 if world_height[x][y] < water_threshold:
                     self.tiles[x][y].terrain = 0 #Water
+                elif world_height[x][y] < sand_threshold:
+                    self.tiles[x][y].terrain = 1 #sand
                 elif world_height[x][y] < plains_threshold:
-                    self.tiles[x][y].terrain = 1 #Plains
-                elif world_height[x][y] < forest_threshold:
-                    self.tiles[x][y].terrain = 2 #Forests
+                    self.tiles[x][y].terrain = 2 #Plains
+                elif world_height[x][y] < hills_threshold:
+                    self.tiles[x][y].terrain = 3 #Hills
+                elif world_height[x][y] < mountain_threshold:
+                    self.tiles[x][y].terrain = 4 #Mountains
                 else:
-                    self.tiles[x][y].terrain = 3 #Mountains
+                    self.tiles[x][y].terrain = 5 #Snow
                 self.tiles[x][y].blocked = False
                 self.tiles[x][y].block_sight = False
 #                if world_height[x][y] < -0.2:

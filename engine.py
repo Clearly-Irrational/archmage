@@ -60,14 +60,18 @@ def main():
             'light_ground': tcod.Color(200, 180, 50),
             'purple_fill': tcod.Color(128, 0, 128),
             #outdoors
-            'light_water_blue': tcod.Color(0, 0, 255),
-            'light_plains_brown': tcod.Color(127, 101, 63),
-            'light_forest_green': tcod.Color(0, 255, 0),
-            'light_mountain_grey': tcod.Color(127, 127, 127),
-            'dark_water_blue': tcod.Color(0, 0, 191),
-            'dark_plains_brown': tcod.Color(94, 75, 47),
-            'dark_forest_green': tcod.Color(0, 191, 0),
-            'dark_mountain_grey': tcod.Color(95, 95, 95),
+            'light_water': tcod.Color(0, 0, 255), #Blue
+            'light_sand': tcod.Color(255, 232, 165), #Amber
+            'light_plains': tcod.Color(0, 255, 0), #Green
+            'light_hills': tcod.Color(127, 101, 63), #Brown
+            'light_mountain': tcod.Color(127, 127, 127), #Grey
+            'light_snow': tcod.Color(223, 223, 223), #White
+            'dark_water': tcod.Color(0, 0, 191), #Blue
+            'dark_sand': tcod.Color(255, 219, 114), #Amber
+            'dark_plains': tcod.Color(0, 191, 0), #Green
+            'dark_hills': tcod.Color(94, 75, 47), #Brown
+            'dark_mountain': tcod.Color(95, 95, 95), #Grey
+            'dark_snow': tcod.Color(255, 255, 255), #White
             #Entities
             'console_white': tcod.Color(255, 255, 255),
             'orc_green': tcod.Color(63, 127, 63),
