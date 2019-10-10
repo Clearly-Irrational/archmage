@@ -7,6 +7,7 @@ class Tile:
         self.explored = False
         self.floodfilled = False
         self.terrain = 0
+        self.vegetation = 0
         
         # By default, if a tile is blocked, it also blocks sight
         if block_sight is None:

@@ -66,14 +66,15 @@ def main():
             'light_plains': tcod.Color(0, 255, 0), #Green
             'light_hills': tcod.Color(127, 101, 63), #Brown
             'light_mountain': tcod.Color(127, 127, 127), #Grey
-            'light_snow': tcod.Color(223, 223, 223), #White
+            'light_snow': tcod.Color(255, 255, 255), #White
             'dark_water': tcod.Color(0, 0, 191), #Blue
             'dark_shallows': tcod.Color(63, 63, 255), #Blue
             'dark_sand': tcod.Color(255, 219, 114), #Amber
             'dark_plains': tcod.Color(0, 191, 0), #Green
             'dark_hills': tcod.Color(94, 75, 47), #Brown
             'dark_mountain': tcod.Color(95, 95, 95), #Grey
-            'dark_snow': tcod.Color(255, 255, 255), #White
+            'dark_snow': tcod.Color(223, 223, 223), #White
+            'tree_green': tcod.Color(0, 63, 0), #Green
             #Entities
             'console_white': tcod.Color(255, 255, 255),
             'orc_green': tcod.Color(63, 127, 63),
