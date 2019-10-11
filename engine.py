@@ -6,6 +6,7 @@ from fov_functions import initialize_fov, recompute_fov
 from game_states import GameStates
 from input_handlers import handle_keys
 from initialize import get_constants
+from palette import Palette
 from game_map import GameMap
 from render_functions import clear_all, render_all
 from caves import Cave
@@ -15,6 +16,8 @@ from world import World
 def main():
     #Set the initial variables
     constants = get_constants()
+    color_palette = Palette()
+    kolors = color_palette.get_colors()
 
     #Set the font file and settings
     font_file = 'font_arial10x10.png'
@@ -42,59 +45,23 @@ def main():
     interface_skin = 'Tutorial' #Choices: Graph, Tutorial
 
     if interface_skin == 'Graph':
-        colors = {
-            #steelblue (70, 130, 180)
-            'dark_wall': tcod.Color(70, 130, 180),
-            'dark_ground': tcod.Color(70, 130, 180),
-            'light_wall': tcod.Color(130, 110, 50),
-            'light_ground': tcod.Color(200, 180, 50),
-            'purple_fill': tcod.Color(128, 0, 128),
-            'console_white': tcod.Color(255, 255, 255)
-        }
-    elif interface_skin == 'Tutorial':
-        colors = {
-            #indoors
-            'dark_wall': tcod.Color(0, 0, 100),
-            'dark_ground': tcod.Color(50, 50, 150),
-            'light_wall': tcod.Color(130, 110, 50),
-            'light_ground': tcod.Color(200, 180, 50),
-            'purple_fill': tcod.Color(128, 0, 128),
-            #outdoors
-            'light_water': tcod.Color(0, 0, 255), #Blue
-            'light_shallows': tcod.Color(100, 100, 255), #Blue
-            'light_sand': tcod.Color(255, 232, 165), #Amber
-            'light_plains': tcod.Color(0, 255, 0), #Green
-            'light_hills': tcod.Color(127, 101, 63), #Brown
-            'light_mountain': tcod.Color(127, 127, 127), #Grey
-            'light_snow': tcod.Color(255, 255, 255), #White
-            'dark_water': tcod.Color(0, 0, 191), #Blue
-            'dark_shallows': tcod.Color(63, 63, 255), #Blue
-            'dark_sand': tcod.Color(255, 219, 114), #Amber
-            'dark_plains': tcod.Color(0, 191, 0), #Green
-            'dark_hills': tcod.Color(94, 75, 47), #Brown
-            'dark_mountain': tcod.Color(95, 95, 95), #Grey
-            'dark_snow': tcod.Color(223, 223, 223), #White
-            'tree_green': tcod.Color(0, 63, 0), #Green
-            #Entities
-            'console_white': tcod.Color(255, 255, 255),
-            'orc_green': tcod.Color(63, 127, 63),
-            'troll_green': tcod.Color(0, 127, 0)
-        }
+        color_palette.set_color('dark_wall', 70, 130, 180)
+        color_palette.set_color('dark_ground', 70, 130, 180)
 
     map_type = 'World' #Choices: Dungeon, Cave, World
 
     if map_type == 'Dungeon':
         indoors = True
         game_map = Dungeon(constants['map_width'], constants['map_height'])
-        game_map.make_map(constants['max_rooms'], constants['room_min_size'], constants['room_max_size'], constants['map_width'], constants['map_height'], player, entities, constants['max_monsters_per_room'])
+        game_map.make_map(constants['max_rooms'], constants['room_min_size'], constants['room_max_size'], constants['map_width'], constants['map_height'], player, entities, constants['max_monsters_per_room'], kolors)
     elif map_type == 'Cave':
         indoors = True
         game_map = Cave(constants['map_width'], constants['map_height'])
-        game_map.make_cave(constants['map_width'], constants['map_height'], player, entities, constants['max_monsters_per_cave'])
+        game_map.make_cave(constants['map_width'], constants['map_height'], player, entities, constants['max_monsters_per_cave'], kolors)
     elif map_type == 'World':
         indoors = False
         game_map = World(constants['map_width'], constants['map_height'])
-        game_map.make_world(constants['map_width'], constants['map_height'], player, entities, constants['max_monsters_per_spawn'])
+        game_map.make_world(constants['map_width'], constants['map_height'], player, entities, constants['max_monsters_per_spawn'], kolors)
 
     #Initialize FOV and calculate on start
     fov_recompute = True
@@ -111,7 +78,7 @@ def main():
             recompute_fov(fov_map, player.x, player.y, fov_radius, fov_light_walls, fov_algorithm)
 
         #Render all entities & tiles on main console and blit them to the root console
-        render_all(main_con, root_con, entities, game_map, fov_map, fov_recompute, constants['screen_width'], constants['screen_height'], colors, game_type, interface_skin, indoors)
+        render_all(main_con, root_con, entities, game_map, fov_map, fov_recompute, constants['screen_width'], constants['screen_height'], kolors, game_type, interface_skin, indoors)
         #Reset FOV check
         fov_recompute = False
         #Update the console with our changes
@@ -159,7 +126,7 @@ def main():
 
         if wait:
             if game_type == 'viewer':
-                entities = game_map.next_map(player, map_type, constants, entities)
+                entities = game_map.next_map(player, map_type, constants, entities, kolors)
                 fov_map = initialize_fov(game_map)
                 fov_recompute = True
                 main_con.clear(fg=(0, 0, 0))

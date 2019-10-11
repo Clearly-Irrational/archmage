@@ -13,7 +13,7 @@ class World(GameMap):
 ##############################
 
 
-    def make_world(self, map_width, map_height, player, entities, max_monsters_per_spawn):
+    def make_world(self, map_width, map_height, player, entities, max_monsters_per_spawn, kolors):
         #elevation = randint(0, 3) #low, level, moderate, high
         #moisture = randint(0, 2) #dry, normal, water
         #temperature = randing(0, 2) #cold, normal, hot
@@ -22,8 +22,8 @@ class World(GameMap):
         octaves = 6
         persistence = 0.5
         lacunarity = 2.0
-        seed_h = randint(0, 1024)
-        seed_v = randint(0, 1024)
+        seed_h = randint(0, 131072)
+        seed_v = randint(0, 131072)
 
         water_threshold = -0.25
         shallows_threshold = -0.2
@@ -31,7 +31,7 @@ class World(GameMap):
         plains_threshold = 0.1
         hills_threshold = 0.3
         mountain_threshold = 0.425
-        vegetation_threshold = 0.0
+        vegetation_threshold = -0.05
 
         world_height = [[0
             for y in range(0, map_height)]
@@ -62,17 +62,17 @@ class World(GameMap):
                 #Vegetation map
                 world_vegetation[x][y] = noise.snoise2(x/scale, y/scale, octaves=octaves, persistence=persistence, lacunarity=lacunarity, repeatx=map_width, repeaty=map_height, base=seed_v)
                 if world_vegetation[x][y] < vegetation_threshold:
-                    self.tiles[x][y].vegetation = 0 #None
-                else:
                     self.tiles[x][y].vegetation = 1 #Yes
+                else:
+                    self.tiles[x][y].vegetation = 0 #None
                 #Tile settings
                 self.tiles[x][y].blocked = False
                 self.tiles[x][y].block_sight = False
 #                if world_height[x][y] < -0.2:
 #                    print(world_height[x][y])
  
-    def next_map(self, player, map_type, constants, entities):
+    def next_map(self, player, map_type, constants, entities, kolors):
         entities = [player]
         self.tiles = self.initialize_tiles()
-        self.make_world(constants['map_width'], constants['map_height'], player, entities, constants['max_monsters_per_spawn'])
+        self.make_world(constants['map_width'], constants['map_height'], player, entities, constants['max_monsters_per_spawn'], kolors)
         return entities

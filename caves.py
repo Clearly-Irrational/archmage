@@ -1,4 +1,3 @@
-import tcod #remove later and abstract monster colors
 from random import randint
 import random
 from math import sqrt
@@ -18,7 +17,7 @@ class Cave(GameMap):
     checked = []
     cave_min_size = 1 #Size in tiles
 
-    def make_cave(self, map_width, map_height, player, entities, max_monsters_per_area):
+    def make_cave(self, map_width, map_height, player, entities, max_monsters_per_area, kolors):
         #Generator variables
         #40, 5, 5, 5 works passably
         initialy_open_chance = 40
@@ -57,7 +56,7 @@ class Cave(GameMap):
 
         #Add monsters
         for cur_cave in self.caves:
-            self.place_entities(cur_cave, entities, max_monsters_per_area)
+            self.place_entities(cur_cave, entities, max_monsters_per_area, kolors)
 
     #Next pass
     def next_pass(self, map_width, map_height, wall_create_threshold, wall_remove_threshold):
@@ -81,10 +80,10 @@ class Cave(GameMap):
                     next_pass.tiles[x][y].block_sight = False
         self = next_pass
 
-    def next_map(self, player, map_type, constants, entities):
+    def next_map(self, player, map_type, constants, entities, kolors):
         entities = [player]
         self.tiles = self.initialize_tiles()
-        self.make_cave(constants['map_width'], constants['map_height'], player, entities, constants['max_monsters_per_cave'])
+        self.make_cave(constants['map_width'], constants['map_height'], player, entities, constants['max_monsters_per_cave'], kolors)
         return entities
 
     def get_caves(self, map_width, map_height):
@@ -263,7 +262,7 @@ class Cave(GameMap):
 
         return wall_counter
 
-    def place_entities(self, area, entities, max_monsters_per_area):
+    def place_entities(self, area, entities, max_monsters_per_area, kolors):
         # Get a random number of monsters
         number_of_monsters = randint(0, max_monsters_per_area)
             
@@ -273,9 +272,9 @@ class Cave(GameMap):
 
             if not any([entity for entity in entities if entity.x == x and entity.y == y]):
                 if randint(0, 100) < 80:
-                    monster = Entity(x, y, 'o', tcod.desaturated_green, 'Orc', blocks=True)
+                    monster = Entity(x, y, 'o', kolors['orc_green'], 'Orc', blocks=True)
                 else:
-                    monster = Entity(x, y, 'T', tcod.darker_green, 'Troll', blocks=True)
+                    monster = Entity(x, y, 'T', kolors['troll_green'], 'Troll', blocks=True)
 
                 entities.append(monster)
 
