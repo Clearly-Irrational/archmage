@@ -12,6 +12,7 @@ from render_functions import clear_all, render_all
 from caves import Cave
 from dungeons import Dungeon
 from world import World
+from vision import third_eye
 
 def main():
     #Set the initial variables
@@ -100,6 +101,7 @@ def main():
         exit = action.get('exit')
         error = action.get('error')
         wait = action.get('wait')
+        vision = action.get('vision')
 
         if move and game_state == GameStates.PLAYERS_TURN:
             dx, dy = move
@@ -123,6 +125,17 @@ def main():
         if error:
             error_text = error
             print("Error detected", error_text)
+
+        if vision:
+            if vision == 'third eye':
+                if interface_skin == 'Tutorial':
+                    interface_skin = third_eye('open_eye', color_palette, indoors)
+                elif interface_skin == 'Graph':
+                    interface_skin = third_eye('close_eye', color_palette, indoors)
+
+            #Recalculate FOV
+            fov_recompute = True
+            game_state = GameStates.ENEMY_TURN
 
         if wait:
             if game_type == 'viewer':

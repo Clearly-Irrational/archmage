@@ -11,6 +11,8 @@ def handle_keys(event):
         return {'move': (-1, 0)}
     elif keypress == 100: #d move right
         return {'move': (1, 0)}
+    elif keypress == 116: #t third eye mode
+        return {'vision': 'third eye'}
     elif keypress == 32: #space wait or generate new map in viewer mode
         return {'wait': True}
     else:
