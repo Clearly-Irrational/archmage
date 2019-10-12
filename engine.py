@@ -1,6 +1,7 @@
 import tcod
 import tcod.event
 
+from fighter import Fighter
 from entity import Entity, get_blocking_entities_at_location
 from fov_functions import initialize_fov, recompute_fov
 from game_states import GameStates
@@ -19,6 +20,7 @@ def main():
     constants = get_constants()
     color_palette = Palette()
     kolors = color_palette.get_colors()
+    mod_key = 'none'
 
     #Set the font file and settings
     font_file = 'font_arial10x10.png'
@@ -33,9 +35,8 @@ def main():
     main_con = tcod.console.Console(constants['screen_width'], constants['screen_height'], constants['screen_order'])
 
     #Initialize entities
-#    player = Entity(int(constants['screen_width']/2), int(constants['screen_height']/2), '@', tcod.black)
-#    npc = Entity(int(constants['screen_width'] / 2 - 5), int(constants['screen_height'] / 2), '@', tcod.yellow)
-    player = Entity(0, 0, '@', tcod.black, 'Player', blocks=True)
+    fighter_component = Fighter(hp=30, protection=2, damage=5)
+    player = Entity(0, 0, '@', tcod.black, 'Player', blocks=True, fighter=fighter_component)
     entities = [player]
 
     #Initialize the map
@@ -49,7 +50,7 @@ def main():
         color_palette.set_color('dark_wall', 70, 130, 180)
         color_palette.set_color('dark_ground', 70, 130, 180)
 
-    map_type = 'World' #Choices: Dungeon, Cave, World
+    map_type = 'Dungeon' #Choices: Dungeon, Cave, World
 
     if map_type == 'Dungeon':
         indoors = True
@@ -94,8 +95,12 @@ def main():
         for event in tcod.event.get():
             if event.type == "QUIT": #Window was closed
                 action = {'exit': True}
+            elif event.type == "KEYUP" and event.sym == 1073742049:
+                mod_key = 'none'
             elif event.type == "KEYDOWN": #A key was depressed
-                action = handle_keys(event)
+                if event.mod == True and event.sym == 1073742049:
+                    mod_key = 'l_shift'
+                action = handle_keys(event, mod_key)
 
         move = action.get('move')
         exit = action.get('exit')
@@ -146,9 +151,8 @@ def main():
 
         if game_state == GameStates.ENEMY_TURN:
             for entity in entities:
-                if entity != player:
-                    #print('The ' + entity.name + ' ponders the meaning of its existence.')
-                    stuff = 0
+                if entity.ai:
+                    entity.ai.take_turn(player, fov_map, game_map, entities)
             game_state = GameStates.PLAYERS_TURN
 
 #            elif event.type == "MOUSEBUTTONDOWN":

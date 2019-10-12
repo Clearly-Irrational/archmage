@@ -4,6 +4,8 @@ from math import sqrt
 
 from tile import Tile
 from game_map import GameMap
+from fighter import Fighter
+from ai import BasicMonster
 from entity import Entity
 
 class Cave(GameMap):
@@ -272,9 +274,13 @@ class Cave(GameMap):
 
             if not any([entity for entity in entities if entity.x == x and entity.y == y]):
                 if randint(0, 100) < 80:
-                    monster = Entity(x, y, 'o', kolors['orc_green'], 'Orc', blocks=True)
+                    fighter_component = Fighter(hp=10, protection=0, damage=3)
+                    ai_component = BasicMonster()
+                    monster = Entity(x, y, 'o', kolors['orc_green'], 'Orc', blocks=True, fighter=fighter_component, ai=ai_component)
                 else:
-                    monster = Entity(x, y, 'T', kolors['troll_green'], 'Troll', blocks=True)
+                    fighter_component = Fighter(hp=16, protection=1, damage=4)
+                    ai_component = BasicMonster()
+                    monster = Entity(x, y, 'T', kolors['troll_green'], 'Troll', blocks=True, fighter=fighter_component, ai=ai_component)
 
                 entities.append(monster)
 
