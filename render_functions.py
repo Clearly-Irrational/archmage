@@ -1,11 +1,18 @@
 import tcod
+from enum import Enum
+
+#Set the entity render order
+class RenderOrder(Enum):
+    CORPSE = 1
+    ITEM = 2
+    ACTOR = 3
 
 #Draw all entities in the list
-def render_all(source_con, dest_con, entities_list, game_map, fov_map, fov_recompute, screen_width, screen_height, kolors, game_type, interface_skin, indoors):
+def render_all(source_con, dest_con, entities_list, player, game_map, fov_map, fov_recompute, screen_width, screen_height, kolors, game_type, interface_skin, indoors):
     if indoors == True:
-        render_all_indoors(source_con, dest_con, entities_list, game_map, fov_map, fov_recompute, screen_width, screen_height, kolors, game_type, interface_skin)
+        render_all_indoors(source_con, dest_con, entities_list, player, game_map, fov_map, fov_recompute, screen_width, screen_height, kolors, game_type, interface_skin)
     if indoors == False:
-        render_all_outdoors(source_con, dest_con, entities_list, game_map, fov_map, fov_recompute, screen_width, screen_height, kolors, game_type, interface_skin)
+        render_all_outdoors(source_con, dest_con, entities_list, player, game_map, fov_map, fov_recompute, screen_width, screen_height, kolors, game_type, interface_skin)
 
 #Clear all entities in the list
 def clear_all(source_con, entities_list):
@@ -24,7 +31,7 @@ def draw_entity(source_con, entity, fov_map):
 def clear_entity(source_con, entity):
     tcod.console_put_char(source_con, entity.x, entity.y, ' ', tcod.BKGND_NONE)
 
-def render_all_indoors(source_con, dest_con, entities_list, game_map, fov_map, fov_recompute, screen_width, screen_height, kolors, game_type, interface_skin):
+def render_all_indoors(source_con, dest_con, entities_list, player, game_map, fov_map, fov_recompute, screen_width, screen_height, kolors, game_type, interface_skin):
     floor_char = chr(298) #256+32+10 (11th char, third row is the empty square)
     if fov_recompute:
         # Draw all the tiles in the game map
@@ -51,13 +58,18 @@ def render_all_indoors(source_con, dest_con, entities_list, game_map, fov_map, f
                     else:
                         tcod.console_set_char_background(source_con, x, y, kolors['dark_ground'], tcod.BKGND_SET)
     #Draw all entities in the list
-    for entity in entities_list:
+    entities_in_render_order = sorted(entities_list, key=lambda x: x.render_order.value)
+    for entity in entities_in_render_order:
         draw_entity(source_con, entity, fov_map)
+
+    #Draw the HP counter
+    source_con.default_fg = (tcod.white)
+    tcod.console_print_ex(source_con, 1, screen_height - 2, tcod.BKGND_NONE, tcod.LEFT, 'HP: {0:02}/{1:02}'.format(player.fighter.hp, player.fighter.max_hp))
 
     #Overlay the source console onto the destination console
     source_con.blit(dest=dest_con, width=screen_width, height=screen_height)
 
-def render_all_outdoors(source_con, dest_con, entities_list, game_map, fov_map, fov_recompute, screen_width, screen_height, kolors, game_type, interface_skin):
+def render_all_outdoors(source_con, dest_con, entities_list, player, game_map, fov_map, fov_recompute, screen_width, screen_height, kolors, game_type, interface_skin):
     floor_char = chr(298) #256+32+10 (11th char, third row is the empty square)
     if fov_recompute:
         # Draw all the tiles in the game map
@@ -77,8 +89,13 @@ def render_all_outdoors(source_con, dest_con, entities_list, game_map, fov_map, 
                     draw_terrain(source_con, game_map, kolors, x, y, shade)
 
     #Draw all entities in the list
-    for entity in entities_list:
+    entities_in_render_order = sorted(entities_list, key=lambda x: x.render_order.value)
+    for entity in entities_in_render_order:
         draw_entity(source_con, entity, fov_map)
+
+    #Draw the HP counter
+    source_con.default_fg = (tcod.white)
+    tcod.console_print_ex(source_con, 1, screen_height - 2, tcod.BKGND_NONE, tcod.LEFT, 'HP: {0:02}/{1:02}'.format(player.fighter.hp, player.fighter.max_hp))
 
     #Overlay the source console onto the destination console
     source_con.blit(dest=dest_con, width=screen_width, height=screen_height)

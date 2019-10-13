@@ -2,6 +2,7 @@ import tcod
 import tcod.event
 
 from fighter import Fighter
+from death_functions import kill_monster, kill_player
 from entity import Entity, get_blocking_entities_at_location
 from fov_functions import initialize_fov, recompute_fov
 from game_states import GameStates
@@ -9,7 +10,7 @@ from input_handlers import handle_keys
 from initialize import get_constants
 from palette import Palette
 from game_map import GameMap
-from render_functions import clear_all, render_all
+from render_functions import clear_all, render_all, RenderOrder
 from caves import Cave
 from dungeons import Dungeon
 from world import World
@@ -35,8 +36,8 @@ def main():
     main_con = tcod.console.Console(constants['screen_width'], constants['screen_height'], constants['screen_order'])
 
     #Initialize entities
-    fighter_component = Fighter(hp=30, protection=2, damage=5)
-    player = Entity(0, 0, '@', tcod.black, 'Player', blocks=True, fighter=fighter_component)
+    fighter_component = Fighter(hp=30, protection=2, power=5)
+    player = Entity(0, 0, '@', tcod.black, 'Player', blocks=True, render_order=RenderOrder.ACTOR, fighter=fighter_component)
     entities = [player]
 
     #Initialize the map
@@ -80,7 +81,7 @@ def main():
             recompute_fov(fov_map, player.x, player.y, fov_radius, fov_light_walls, fov_algorithm)
 
         #Render all entities & tiles on main console and blit them to the root console
-        render_all(main_con, root_con, entities, game_map, fov_map, fov_recompute, constants['screen_width'], constants['screen_height'], kolors, game_type, interface_skin, indoors)
+        render_all(main_con, root_con, entities, player, game_map, fov_map, fov_recompute, constants['screen_width'], constants['screen_height'], kolors, game_type, interface_skin, indoors)
         #Reset FOV check
         fov_recompute = False
         #Update the console with our changes
@@ -102,12 +103,17 @@ def main():
                     mod_key = 'l_shift'
                 action = handle_keys(event, mod_key)
 
+        #Get action type
         move = action.get('move')
         exit = action.get('exit')
         error = action.get('error')
         wait = action.get('wait')
         vision = action.get('vision')
 
+        #List to store the results of damage
+        player_turn_results = []
+
+        #Process player actions
         if move and game_state == GameStates.PLAYERS_TURN:
             dx, dy = move
             destination_x = player.x + dx
@@ -117,7 +123,8 @@ def main():
                 #If no entity is blocking then move the player
                 target = get_blocking_entities_at_location(entities, destination_x, destination_y)
                 if target:
-                    print('You kick the ' + target.name + ' in the shins, much to its annoyance!')
+                    attack_results = player.fighter.attack(target)
+                    player_turn_results.extend(attack_results)
                 else:
                     player.move(dx, dy)
                     #Recalculate FOV if player moves
@@ -131,7 +138,7 @@ def main():
             error_text = error
             print("Error detected", error_text)
 
-        if vision:
+        if vision and game_state == GameStates.PLAYERS_TURN:
             if vision == 'third eye':
                 if interface_skin == 'Tutorial':
                     interface_skin = third_eye('open_eye', color_palette, indoors)
@@ -142,18 +149,57 @@ def main():
             fov_recompute = True
             game_state = GameStates.ENEMY_TURN
 
-        if wait:
+        if wait and game_state == GameStates.PLAYERS_TURN:
             if game_type == 'viewer':
                 entities = game_map.next_map(player, map_type, constants, entities, kolors)
                 fov_map = initialize_fov(game_map)
                 fov_recompute = True
                 main_con.clear(fg=(0, 0, 0))
 
+        #Process player turn results
+        for player_turn_result in player_turn_results:
+            message = player_turn_result.get('message')
+            dead_entity = player_turn_result.get('dead')
+
+            if message:
+                print(message)
+
+            if dead_entity:
+                if dead_entity == player:
+                    message, game_state = kill_player(dead_entity)
+                else:
+                    message = kill_monster(dead_entity)
+
+                print(message)
+
+        #Enemy turn
         if game_state == GameStates.ENEMY_TURN:
             for entity in entities:
                 if entity.ai:
-                    entity.ai.take_turn(player, fov_map, game_map, entities)
-            game_state = GameStates.PLAYERS_TURN
+                    enemy_turn_results = entity.ai.take_turn(player, fov_map, game_map, entities)
+
+                    for enemy_turn_result in enemy_turn_results:
+                        message = enemy_turn_result.get('message')
+                        dead_entity = enemy_turn_result.get('dead')
+
+                        if message:
+                            print(message)
+
+                        if dead_entity:
+                            if dead_entity == player:
+                                message, game_state = kill_player(dead_entity)
+                            else:
+                                message = kill_monster(dead_entity)
+
+                            print(message)
+
+                            if game_state == GameStates.PLAYER_DEAD:
+                                break
+
+                    if game_state == GameStates.PLAYER_DEAD:
+                        break
+            else:
+                game_state = GameStates.PLAYERS_TURN
 
 #            elif event.type == "MOUSEBUTTONDOWN":
 #                mousebuttondown = True
