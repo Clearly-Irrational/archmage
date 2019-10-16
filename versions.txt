@@ -1,2 +1,7 @@
 Python 3.7.3
-tcod-11.4.0
+
+#Python additional packages
+tcod             11.4.0 
+noise            1.2.2  
+Pillow           6.2.0  
+ruamel.yaml      0.16.5

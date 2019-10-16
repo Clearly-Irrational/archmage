@@ -8,6 +8,7 @@ from fighter import Fighter
 from ai import BasicMonster
 from entity import Entity
 from render_functions import RenderOrder
+from generator import gen_monster
 
 class Cave(GameMap):
 ##################################################
@@ -274,14 +275,22 @@ class Cave(GameMap):
             (x, y) = coord
 
             if not any([entity for entity in entities if entity.x == x and entity.y == y]):
+                #Initialize variables
+                monster_name = 'none'
+                ai_component = 'none'
+                #Roll for what monster to populate
                 if randint(0, 100) < 80:
-                    fighter_component = Fighter(hp=10, protection=0, power=3)
-                    ai_component = BasicMonster()
-                    monster = Entity(x, y, 'o', kolors['orc_green'], 'Orc', blocks=True, fighter=fighter_component, render_order=RenderOrder.ACTOR, ai=ai_component)
+                    monster_name = 'Orc'
                 else:
-                    fighter_component = Fighter(hp=16, protection=1, power=4)
+                    monster_name = 'Troll'
+                #Pull in the dictionary entry for this monster
+                m_loader = gen_monster(monster_name)
+                #Set the monster stats
+                fighter_component = Fighter(hp=m_loader['hp'], protection=m_loader['protection'], power=m_loader['power'])
+                #Set the ai
+                if m_loader['ai_component'] == 'basic':
                     ai_component = BasicMonster()
-                    monster = Entity(x, y, 'T', kolors['troll_green'], 'Troll', blocks=True, fighter=fighter_component, render_order=RenderOrder.ACTOR, ai=ai_component)
-
+                #Create the monster entity
+                monster = Entity(x, y, m_loader['display_char'], kolors[m_loader['color']], m_loader['name'], blocks=True, fighter=fighter_component, render_order=RenderOrder.ACTOR, ai=ai_component)
+                #Append the monster to the list of entities
                 entities.append(monster)
-
