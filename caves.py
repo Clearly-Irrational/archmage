@@ -8,7 +8,7 @@ from fighter import Fighter
 from ai import BasicMonster
 from entity import Entity
 from render_functions import RenderOrder
-from generator import gen_monster
+from generator import gen_monster, roll_monster
 
 class Cave(GameMap):
 ##################################################
@@ -275,14 +275,8 @@ class Cave(GameMap):
             (x, y) = coord
 
             if not any([entity for entity in entities if entity.x == x and entity.y == y]):
-                #Initialize variables
-                monster_name = 'none'
-                ai_component = 'none'
                 #Roll for what monster to populate
-                if randint(0, 100) < 80:
-                    monster_name = 'Orc'
-                else:
-                    monster_name = 'Troll'
+                monster_name = roll_monster()
                 #Pull in the dictionary entry for this monster
                 m_loader = gen_monster(monster_name)
                 #Set the monster stats
@@ -291,6 +285,6 @@ class Cave(GameMap):
                 if m_loader['ai_component'] == 'basic':
                     ai_component = BasicMonster()
                 #Create the monster entity
-                monster = Entity(x, y, m_loader['display_char'], kolors[m_loader['color']], m_loader['name'], blocks=True, fighter=fighter_component, render_order=RenderOrder.ACTOR, ai=ai_component)
+                monster = Entity(x, y, m_loader['display_char'], kolors[m_loader['color']], m_loader['display_name'], blocks=True, fighter=fighter_component, render_order=RenderOrder.ACTOR, ai=ai_component)
                 #Append the monster to the list of entities
                 entities.append(monster)

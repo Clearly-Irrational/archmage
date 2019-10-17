@@ -1,15 +1,37 @@
 ---
-  - name: Orc
-    hp: 10
-    protection: 0
-    power: 3
-    ai_component: basic
-    display_char: o
-    color: orc_green
-  - name: Troll
-    hp: 16
-    protection: 1
-    power: 4
-    ai_component: basic
-    display_char: T
-    color: troll_green
+  - Orc: 
+        display_name: Orc
+        hp: 10
+        protection: 0
+        power: 3
+        ai_component: basic
+        display_char: o
+        color: orc_green
+        habitat:
+          - dungeon
+          - cave
+          - world
+  - Troll: 
+        display_name: Troll
+        hp: 16
+        protection: 1
+        power: 4
+        ai_component: basic
+        display_char: T
+        color: troll_green
+        habitat:
+          - dungeon
+          - cave
+          - world
+  - Ghoul:
+        display_name: Ghoul
+        hp: 10
+        protection: 2
+        power: 3
+        ai_component: basic
+        display_char: g
+        color: troll_green
+        habitat:
+          - dungeon
+          - cave
+          - world
