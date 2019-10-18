@@ -12,7 +12,7 @@ def get_yaml_data(key, value, list_name):
             if list(d)[0] == value: #Compare bare entry vs value
                 return d.get(value) #Return dictionary instead of key:value   
 
-def get_yaml_list(list_name):
+def get_yaml_list(habitat, difficulty, list_name):
     if list_name == 'monsters':
         input_file = open("data_files/monsters.yaml").read() #Open a file stream
         yaml=YAML(typ="safe", pure=True) #Create the yaml object
@@ -20,8 +20,13 @@ def get_yaml_list(list_name):
 
         results_list = []
         for d in monster_list: #Iterate through list of dictionaries
-            results_list.append(list(d)[0]) #Append bare value to results
-        return results_list #Return results   
+            monster_entry = d.get(list(d)[0])
+            entry_habitat = monster_entry.get('habitat')
+            entry_difficulty = monster_entry.get('difficulty')
+            for h in entry_habitat:
+                if habitat == h and entry_difficulty == difficulty:
+                    results_list.append(list(d)[0]) #Append bare value
+        return results_list #Return habitat and diff filtered result list   
 
 #OTHER EXAMPLES
 #Iterate through the whole list and print each of the key / value pairs
@@ -29,7 +34,7 @@ def get_yaml_list(list_name):
 #    for key, value in listing.items():
 #        print(key, ":", value)
 
-#roster_loader = get_yaml_list('monsters')
+#roster_loader = get_yaml_list('cave', 2, 'monsters')
 #print(roster_loader)
 #monster_loader = get_yaml_data('display_name', 'Troll', 'monsters')
 #print(monster_loader['hp'])

@@ -1,4 +1,16 @@
 ---
+  - Ape_c:
+        display_name: Cave Ape
+        hp: 8
+        protection: 0
+        power: 4
+        ai_component: basic
+        display_char: a
+        color: ape_c_white
+        difficulty: 1 
+        habitat:
+          - cave
+          - world
   - Orc: 
         display_name: Orc
         hp: 10
@@ -7,8 +19,8 @@
         ai_component: basic
         display_char: o
         color: orc_green
+        difficulty: 1
         habitat:
-          - dungeon
           - cave
           - world
   - Troll: 
@@ -19,9 +31,45 @@
         ai_component: basic
         display_char: T
         color: troll_green
+        difficulty: 2
+        habitat:
+          - cave
+          - world
+  - Spider_g:
+        display_name: Giant Spider
+        hp: 12
+        protection: 2
+        power: 3
+        ai_component: basic
+        display_char: S
+        color: spider_brown
+        difficulty: 2
+        habitat:
+          - cave
+          - world
+  - Skeleton:
+        display_name: Skeleton
+        hp: 10
+        protection: 0
+        power: 3
+        ai_component: basic
+        display_char: s
+        color: skeleton_white
+        difficulty: 1
         habitat:
           - dungeon
-          - cave
+          - world
+  - Zombie:
+        display_name: Zombie
+        hp: 20
+        protection: 1
+        power: 1
+        ai_component: basic
+        display_char: z
+        color: zombie_black
+        difficulty: 1
+        habitat:
+          - dungeon
           - world
   - Ghoul:
         display_name: Ghoul
@@ -30,8 +78,20 @@
         power: 3
         ai_component: basic
         display_char: g
-        color: troll_green
+        color: ghoul_green
+        difficulty: 2
         habitat:
           - dungeon
-          - cave
+          - world
+  - Banshee:
+        display_name: Banshee
+        hp: 15
+        protection: 1
+        power: 4
+        ai_component: basic
+        display_char: b
+        color: banshee_blue
+        difficulty: 2
+        habitat:
+          - dungeon
           - world

@@ -276,7 +276,7 @@ class Cave(GameMap):
 
             if not any([entity for entity in entities if entity.x == x and entity.y == y]):
                 #Roll for what monster to populate
-                monster_name = roll_monster()
+                monster_name = roll_monster('cave')
                 #Pull in the dictionary entry for this monster
                 m_loader = gen_monster(monster_name)
                 #Set the monster stats
