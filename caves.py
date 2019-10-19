@@ -21,7 +21,7 @@ class Cave(GameMap):
     checked = []
     cave_min_size = 1 #Size in tiles
 
-    def make_cave(self, map_width, map_height, player, entities, max_monsters_per_area, kolors):
+    def make_cave(self, map_width, map_height, player, entities, max_monsters_per_area, kolors, current_roster):
         #Generator variables
         #40, 5, 5, 5 works passably
         initialy_open_chance = 40
@@ -60,7 +60,7 @@ class Cave(GameMap):
 
         #Add monsters
         for cur_cave in self.caves:
-            self.place_entities(cur_cave, entities, max_monsters_per_area, kolors)
+            self.place_entities(cur_cave, entities, max_monsters_per_area, kolors, current_roster)
 
     #Next pass
     def next_pass(self, map_width, map_height, wall_create_threshold, wall_remove_threshold):
@@ -84,10 +84,10 @@ class Cave(GameMap):
                     next_pass.tiles[x][y].block_sight = False
         self = next_pass
 
-    def next_map(self, player, map_type, constants, entities, kolors):
+    def next_map(self, player, map_type, constants, entities, kolors, current_roster):
         entities = [player]
         self.tiles = self.initialize_tiles()
-        self.make_cave(constants['map_width'], constants['map_height'], player, entities, constants['max_monsters_per_cave'], kolors)
+        self.make_cave(constants['map_width'], constants['map_height'], player, entities, constants['max_monsters_per_cave'], kolors, current_roster)
         return entities
 
     def get_caves(self, map_width, map_height):
@@ -266,7 +266,7 @@ class Cave(GameMap):
 
         return wall_counter
 
-    def place_entities(self, area, entities, max_monsters_per_area, kolors):
+    def place_entities(self, area, entities, max_monsters_per_area, kolors, current_roster):
         # Get a random number of monsters
         number_of_monsters = randint(0, max_monsters_per_area)
             
@@ -276,7 +276,7 @@ class Cave(GameMap):
 
             if not any([entity for entity in entities if entity.x == x and entity.y == y]):
                 #Roll for what monster to populate
-                monster_name = roll_monster('cave')
+                monster_name = roll_monster('cave', current_roster)
                 #Pull in the dictionary entry for this monster
                 m_loader = gen_monster(monster_name)
                 #Set the monster stats

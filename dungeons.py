@@ -14,7 +14,7 @@ class Dungeon(GameMap):
 ########################################
 #####Generate a traditional dungeon#####
 ########################################
-    def make_map(self, max_rooms, room_min_size, room_max_size, map_width, map_height, player, entities, max_monsters_per_area, kolors):
+    def make_map(self, max_rooms, room_min_size, room_max_size, map_width, map_height, player, entities, max_monsters_per_area, kolors, current_roster):
         rooms = []
         num_rooms = 0
 
@@ -55,7 +55,7 @@ class Dungeon(GameMap):
                         self.build_tunnel(prev_x, prev_y, new_x, new_y) 
 
                 #Add monsters
-                self.place_entities(new_room, entities, max_monsters_per_area, kolors)
+                self.place_entities(new_room, entities, max_monsters_per_area, kolors, current_roster)
                 # finally, append the new room to the list
                 rooms.append(new_room)
                 num_rooms += 1
@@ -143,13 +143,13 @@ class Dungeon(GameMap):
                         self.create_v_tunnel(mid_y, new_y, new_x)
                         self.create_h_tunnel(prev_x, mid_x, prev_y)
 
-    def next_map(self, player, map_type, constants, entities, kolors):
+    def next_map(self, player, map_type, constants, entities, kolors, current_roster):
         entities = [player]
         self.tiles = self.initialize_tiles()
-        self.make_map(constants['max_rooms'], constants['room_min_size'], constants['room_max_size'], constants['map_width'], constants['map_height'], player, entities, constants['max_monsters_per_room'], kolors)
+        self.make_map(constants['max_rooms'], constants['room_min_size'], constants['room_max_size'], constants['map_width'], constants['map_height'], player, entities, constants['max_monsters_per_room'], kolors, current_roster)
         return entities
 
-    def place_entities(self, area, entities, max_monsters_per_area, kolors):
+    def place_entities(self, area, entities, max_monsters_per_area, kolors, current_roster):
         # Get a random number of monsters
         number_of_monsters = randint(0, max_monsters_per_area)
 
@@ -160,7 +160,7 @@ class Dungeon(GameMap):
 
             if not any([entity for entity in entities if entity.x == x and entity.y == y]):
                 #Roll for what monster to populate
-                monster_name = roll_monster('dungeon')
+                monster_name = roll_monster('dungeon', current_roster)
                 #Pull in the dictionary entry for this monster
                 m_loader = gen_monster(monster_name)
                 #Set the monster stats
