@@ -27,7 +27,9 @@ def main():
     #Build and initialize the random monster rosters
     cr = RosterLists()
     cr.build_roster_lists()
+    cr.build_monster_manual()
     current_roster = cr.get_roster_lists()
+    current_mm = cr.get_monster_manual()
 
     #Set the font file and settings
     font_file = 'font_arial10x10.png'
@@ -57,20 +59,20 @@ def main():
         color_palette.set_color('dark_wall', 70, 130, 180)
         color_palette.set_color('dark_ground', 70, 130, 180)
 
-    map_type = 'Dungeon' #Choices: Dungeon, Cave, World
+    map_type = 'World' #Choices: Dungeon, Cave, World
 
     if map_type == 'Dungeon':
         indoors = True
         game_map = Dungeon(constants['map_width'], constants['map_height'])
-        game_map.make_map(constants['max_rooms'], constants['room_min_size'], constants['room_max_size'], constants['map_width'], constants['map_height'], player, entities, constants['max_monsters_per_room'], kolors, current_roster)
+        game_map.make_map(constants['max_rooms'], constants['room_min_size'], constants['room_max_size'], constants['map_width'], constants['map_height'], player, entities, constants['max_monsters_per_room'], kolors, current_roster, current_mm)
     elif map_type == 'Cave':
         indoors = True
         game_map = Cave(constants['map_width'], constants['map_height'])
-        game_map.make_cave(constants['map_width'], constants['map_height'], player, entities, constants['max_monsters_per_cave'], kolors, current_roster)
+        game_map.make_cave(constants['map_width'], constants['map_height'], player, entities, constants['max_monsters_per_cave'], kolors, current_roster, current_mm)
     elif map_type == 'World':
         indoors = False
         game_map = World(constants['map_width'], constants['map_height'])
-        game_map.make_world(constants['map_width'], constants['map_height'], player, entities, constants['max_monsters_per_spawn'], kolors, current_roster)
+        game_map.make_world(constants['map_width'], constants['map_height'], player, entities, constants['max_monsters_per_spawn'], kolors, current_roster, current_mm)
 
     #Initialize FOV and calculate on start
     fov_recompute = True
@@ -157,7 +159,7 @@ def main():
 
         if wait and game_state == GameStates.PLAYERS_TURN:
             if game_type == 'viewer':
-                entities = game_map.next_map(player, map_type, constants, entities, kolors, current_roster)
+                entities = game_map.next_map(player, map_type, constants, entities, kolors, current_roster, current_mm)
                 fov_map = initialize_fov(game_map)
                 fov_recompute = True
                 main_con.clear(fg=(0, 0, 0))

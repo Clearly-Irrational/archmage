@@ -13,7 +13,7 @@ class World(GameMap):
 ##############################
 
 
-    def make_world(self, map_width, map_height, player, entities, max_monsters_per_spawn, kolors, current_roster):
+    def make_world(self, map_width, map_height, player, entities, max_monsters_per_spawn, kolors, current_roster, current_mm):
         #elevation = randint(0, 3) #low, level, moderate, high
         #moisture = randint(0, 2) #dry, normal, water
         #temperature = randing(0, 2) #cold, normal, hot
@@ -71,8 +71,8 @@ class World(GameMap):
 #                if world_height[x][y] < -0.2:
 #                    print(world_height[x][y])
  
-    def next_map(self, player, map_type, constants, entities, kolors, current_roster):
+    def next_map(self, player, map_type, constants, entities, kolors, current_roster, current_mm):
         entities = [player]
         self.tiles = self.initialize_tiles()
-        self.make_world(constants['map_width'], constants['map_height'], player, entities, constants['max_monsters_per_spawn'], kolors, current_roster)
+        self.make_world(constants['map_width'], constants['map_height'], player, entities, constants['max_monsters_per_spawn'], kolors, current_roster, current_mm)
         return entities
