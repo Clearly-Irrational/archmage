@@ -43,6 +43,9 @@ def main():
     #Create another console where we'll draw before overlaying it on the root
     main_con = tcod.console.Console(constants['screen_width'], constants['screen_height'], constants['screen_order'])
 
+    #Create panel console for the hp bar and message log
+    panel_con = tcod.console.Console(constants['screen_width'], constants['panel_height'], constants['screen_order'])
+
     #Initialize entities
     fighter_component = Fighter(hp=30, protection=2, power=5)
     player = Entity(0, 0, '@', tcod.black, 'Player', blocks=True, render_order=RenderOrder.ACTOR, fighter=fighter_component)
@@ -59,7 +62,7 @@ def main():
         color_palette.set_color('dark_wall', 70, 130, 180)
         color_palette.set_color('dark_ground', 70, 130, 180)
 
-    map_type = 'World' #Choices: Dungeon, Cave, World
+    map_type = 'Dungeon' #Choices: Dungeon, Cave, World
 
     if map_type == 'Dungeon':
         indoors = True
@@ -89,7 +92,7 @@ def main():
             recompute_fov(fov_map, player.x, player.y, fov_radius, fov_light_walls, fov_algorithm)
 
         #Render all entities & tiles on main console and blit them to the root console
-        render_all(main_con, root_con, entities, player, game_map, fov_map, fov_recompute, constants['screen_width'], constants['screen_height'], kolors, game_type, interface_skin, indoors)
+        render_all(main_con, root_con, panel_con, entities, player, game_map, fov_map, fov_recompute, constants['screen_width'], constants['screen_height'], kolors, game_type, interface_skin, indoors, constants['hp_bar_width'], constants['panel_height'], constants['panel_y'])
         #Reset FOV check
         fov_recompute = False
         #Update the console with our changes

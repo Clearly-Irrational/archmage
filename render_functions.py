@@ -7,12 +7,26 @@ class RenderOrder(Enum):
     ITEM = 2
     ACTOR = 3
 
+def render_bar(panel_con, x, y, total_width, name, value, maximum, bar_color, back_color):
+    #Figure out how wide the bar should be
+    bar_width = int(float(value) / maximum * total_width)
+    #Create the background
+    tcod.console_set_default_background(panel_con, back_color)
+    tcod.console_rect(panel_con, x, y, total_width, 1, False, tcod.BKGND_SCREEN)
+    #Create the bar
+    tcod.console_set_default_background(panel_con, bar_color)
+    if bar_width > 0:
+        tcod.console_rect(panel_con, x, y, bar_width, 1, False, tcod.BKGND_SCREEN)
+    #Print the value
+    tcod.console_set_default_foreground(panel_con, tcod.white)
+    tcod.console_print_ex(panel_con, int(x + total_width / 2), y, tcod.BKGND_NONE, tcod.CENTER, '{0}: {1}/{2}'.format(name, value, maximum))
+
 #Draw all entities in the list
-def render_all(source_con, dest_con, entities_list, player, game_map, fov_map, fov_recompute, screen_width, screen_height, kolors, game_type, interface_skin, indoors):
+def render_all(source_con, dest_con, panel_con, entities_list, player, game_map, fov_map, fov_recompute, screen_width, screen_height, kolors, game_type, interface_skin, indoors, hp_bar_width, panel_height, panel_y):
     if indoors == True:
-        render_all_indoors(source_con, dest_con, entities_list, player, game_map, fov_map, fov_recompute, screen_width, screen_height, kolors, game_type, interface_skin)
+        render_all_indoors(source_con, dest_con, panel_con, entities_list, player, game_map, fov_map, fov_recompute, screen_width, screen_height, kolors, game_type, interface_skin, hp_bar_width, panel_height, panel_y)
     if indoors == False:
-        render_all_outdoors(source_con, dest_con, entities_list, player, game_map, fov_map, fov_recompute, screen_width, screen_height, kolors, game_type, interface_skin)
+        render_all_outdoors(source_con, dest_con, panel_con, entities_list, player, game_map, fov_map, fov_recompute, screen_width, screen_height, kolors, game_type, interface_skin, hp_bar_width, panel_height, panel_y)
 
 #Clear all entities in the list
 def clear_all(source_con, entities_list):
@@ -31,7 +45,7 @@ def draw_entity(source_con, entity, fov_map):
 def clear_entity(source_con, entity):
     tcod.console_put_char(source_con, entity.x, entity.y, ' ', tcod.BKGND_NONE)
 
-def render_all_indoors(source_con, dest_con, entities_list, player, game_map, fov_map, fov_recompute, screen_width, screen_height, kolors, game_type, interface_skin):
+def render_all_indoors(source_con, dest_con, panel_con, entities_list, player, game_map, fov_map, fov_recompute, screen_width, screen_height, kolors, game_type, interface_skin, hp_bar_width, panel_height, panel_y):
     floor_char = chr(298) #256+32+10 (11th char, third row is the empty square)
     if fov_recompute:
         # Draw all the tiles in the game map
@@ -62,14 +76,16 @@ def render_all_indoors(source_con, dest_con, entities_list, player, game_map, fo
     for entity in entities_in_render_order:
         draw_entity(source_con, entity, fov_map)
 
-    #Draw the HP counter
-    source_con.default_fg = (tcod.white)
-    tcod.console_print_ex(source_con, 1, screen_height - 2, tcod.BKGND_NONE, tcod.LEFT, 'HP: {0:02}/{1:02}'.format(player.fighter.hp, player.fighter.max_hp))
-
     #Overlay the source console onto the destination console
     source_con.blit(dest=dest_con, width=screen_width, height=screen_height)
 
-def render_all_outdoors(source_con, dest_con, entities_list, player, game_map, fov_map, fov_recompute, screen_width, screen_height, kolors, game_type, interface_skin):
+    #Draw the HP counter
+    panel_con.default_bg = (tcod.black)
+    tcod.console_clear(panel_con)
+    render_bar(panel_con, 1, 1, hp_bar_width, 'HP', player.fighter.hp, player.fighter.max_hp, tcod.light_red, tcod.darker_red)
+    panel_con.blit(dest=dest_con, width=screen_width, height=panel_height, dest_y=panel_y)
+
+def render_all_outdoors(source_con, dest_con, panel_con, entities_list, player, game_map, fov_map, fov_recompute, screen_width, screen_height, kolors, game_type, interface_skin, hp_bar_width, panel_height, panel_y):
     floor_char = chr(298) #256+32+10 (11th char, third row is the empty square)
     if fov_recompute:
         # Draw all the tiles in the game map
@@ -93,12 +109,14 @@ def render_all_outdoors(source_con, dest_con, entities_list, player, game_map, f
     for entity in entities_in_render_order:
         draw_entity(source_con, entity, fov_map)
 
-    #Draw the HP counter
-    source_con.default_fg = (tcod.white)
-    tcod.console_print_ex(source_con, 1, screen_height - 2, tcod.BKGND_NONE, tcod.LEFT, 'HP: {0:02}/{1:02}'.format(player.fighter.hp, player.fighter.max_hp))
-
     #Overlay the source console onto the destination console
     source_con.blit(dest=dest_con, width=screen_width, height=screen_height)
+
+    #Draw the HP counter
+    panel_con.default_bg = (tcod.black)
+    tcod.console_clear(panel_con)
+    render_bar(panel_con, 1, 1, hp_bar_width, 'HP', player.fighter.hp, player.fighter.max_hp, tcod.light_red, tcod.darker_red)
+    panel_con.blit(dest=dest_con, width=screen_width, height=panel_height, dest_y=panel_y)
 
 def draw_terrain(source_con, game_map, kolors, x, y, shade):
     tree_char = chr(288) #256+32 (1st char, third row is the up arrow)
