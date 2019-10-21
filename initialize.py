@@ -9,10 +9,15 @@ def get_constants():
     screen_order = 'F'
     screen_vsync = True
 
+    #Panel
     hp_bar_width = 20
     panel_height = 7
     panel_y = screen_height - panel_height
+    message_x = hp_bar_width + 2
+    message_width = screen_width - hp_bar_width - 2
+    message_height = panel_height - 1
 
+    #Map
     map_width = screen_width
     map_height = screen_height - panel_height
 
@@ -39,6 +44,9 @@ def get_constants():
         'hp_bar_width': hp_bar_width,
         'panel_height': panel_height,
         'panel_y': panel_y,
+        'message_x': message_x,
+        'message_width': message_width,
+        'message_height': message_height,
         'map_width': map_width,
         'map_height': map_height,
         'room_max_size': room_max_size,

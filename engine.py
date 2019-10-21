@@ -16,6 +16,7 @@ from dungeons import Dungeon
 from world import World
 from vision import third_eye
 from generator import RosterLists
+from game_messages import MessageLog
 
 def main():
     #Set the initial variables
@@ -62,7 +63,7 @@ def main():
         color_palette.set_color('dark_wall', 70, 130, 180)
         color_palette.set_color('dark_ground', 70, 130, 180)
 
-    map_type = 'Dungeon' #Choices: Dungeon, Cave, World
+    map_type = 'World' #Choices: Dungeon, Cave, World
 
     if map_type == 'Dungeon':
         indoors = True
@@ -82,6 +83,8 @@ def main():
     fov_map = initialize_fov(game_map)
     game_type = 'viewer' #choices normal, viewer
 
+    #Initialize the message log
+    message_log = MessageLog(constants['message_x'], constants['message_width'], constants['message_height'])
 
     #Initialize main loop
     game_state = GameStates.PLAYERS_TURN
@@ -92,7 +95,8 @@ def main():
             recompute_fov(fov_map, player.x, player.y, fov_radius, fov_light_walls, fov_algorithm)
 
         #Render all entities & tiles on main console and blit them to the root console
-        render_all(main_con, root_con, panel_con, entities, player, game_map, fov_map, fov_recompute, constants['screen_width'], constants['screen_height'], kolors, game_type, interface_skin, indoors, constants['hp_bar_width'], constants['panel_height'], constants['panel_y'])
+        render_all(main_con, root_con, panel_con, entities, player, game_map, fov_map, fov_recompute, message_log, constants['screen_width'], constants['screen_height'], kolors, game_type, interface_skin, indoors, constants['hp_bar_width'], constants['panel_height'], constants['panel_y'])
+
         #Reset FOV check
         fov_recompute = False
         #Update the console with our changes
@@ -173,7 +177,7 @@ def main():
             dead_entity = player_turn_result.get('dead')
 
             if message:
-                print(message)
+                message_log.add_message(message)
 
             if dead_entity:
                 if dead_entity == player:
@@ -181,7 +185,7 @@ def main():
                 else:
                     message = kill_monster(dead_entity)
 
-                print(message)
+                message_log.add_message(message)
 
         #Enemy turn
         if game_state == GameStates.ENEMY_TURN:
@@ -194,7 +198,7 @@ def main():
                         dead_entity = enemy_turn_result.get('dead')
 
                         if message:
-                            print(message)
+                            message_log.add_message(message)
 
                         if dead_entity:
                             if dead_entity == player:
@@ -202,7 +206,7 @@ def main():
                             else:
                                 message = kill_monster(dead_entity)
 
-                            print(message)
+                            message_log.add_message(message)
 
                             if game_state == GameStates.PLAYER_DEAD:
                                 break

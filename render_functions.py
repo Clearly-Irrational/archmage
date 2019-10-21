@@ -22,11 +22,11 @@ def render_bar(panel_con, x, y, total_width, name, value, maximum, bar_color, ba
     tcod.console_print_ex(panel_con, int(x + total_width / 2), y, tcod.BKGND_NONE, tcod.CENTER, '{0}: {1}/{2}'.format(name, value, maximum))
 
 #Draw all entities in the list
-def render_all(source_con, dest_con, panel_con, entities_list, player, game_map, fov_map, fov_recompute, screen_width, screen_height, kolors, game_type, interface_skin, indoors, hp_bar_width, panel_height, panel_y):
+def render_all(source_con, dest_con, panel_con, entities_list, player, game_map, fov_map, fov_recompute, message_log, screen_width, screen_height, kolors, game_type, interface_skin, indoors, hp_bar_width, panel_height, panel_y):
     if indoors == True:
-        render_all_indoors(source_con, dest_con, panel_con, entities_list, player, game_map, fov_map, fov_recompute, screen_width, screen_height, kolors, game_type, interface_skin, hp_bar_width, panel_height, panel_y)
+        render_all_indoors(source_con, dest_con, panel_con, entities_list, player, game_map, fov_map, fov_recompute, message_log, screen_width, screen_height, kolors, game_type, interface_skin, hp_bar_width, panel_height, panel_y)
     if indoors == False:
-        render_all_outdoors(source_con, dest_con, panel_con, entities_list, player, game_map, fov_map, fov_recompute, screen_width, screen_height, kolors, game_type, interface_skin, hp_bar_width, panel_height, panel_y)
+        render_all_outdoors(source_con, dest_con, panel_con, entities_list, player, game_map, fov_map, fov_recompute, message_log, screen_width, screen_height, kolors, game_type, interface_skin, hp_bar_width, panel_height, panel_y)
 
 #Clear all entities in the list
 def clear_all(source_con, entities_list):
@@ -45,7 +45,7 @@ def draw_entity(source_con, entity, fov_map):
 def clear_entity(source_con, entity):
     tcod.console_put_char(source_con, entity.x, entity.y, ' ', tcod.BKGND_NONE)
 
-def render_all_indoors(source_con, dest_con, panel_con, entities_list, player, game_map, fov_map, fov_recompute, screen_width, screen_height, kolors, game_type, interface_skin, hp_bar_width, panel_height, panel_y):
+def render_all_indoors(source_con, dest_con, panel_con, entities_list, player, game_map, fov_map, fov_recompute, message_log, screen_width, screen_height, kolors, game_type, interface_skin, hp_bar_width, panel_height, panel_y):
     floor_char = chr(298) #256+32+10 (11th char, third row is the empty square)
     if fov_recompute:
         # Draw all the tiles in the game map
@@ -79,13 +79,23 @@ def render_all_indoors(source_con, dest_con, panel_con, entities_list, player, g
     #Overlay the source console onto the destination console
     source_con.blit(dest=dest_con, width=screen_width, height=screen_height)
 
-    #Draw the HP counter
+    #Setup the panel console
     panel_con.default_bg = (tcod.black)
     tcod.console_clear(panel_con)
+
+    #Print the game messages, one line at a time
+    y = 1
+    for message in message_log.messages:
+        panel_con.print(x=message_log.x, y=y, string=message.text, fg=message.color, bg_blend=tcod.BKGND_NONE, alignment=tcod.LEFT)
+        y += 1
+
+    #Draw the HP counter
     render_bar(panel_con, 1, 1, hp_bar_width, 'HP', player.fighter.hp, player.fighter.max_hp, tcod.light_red, tcod.darker_red)
+
+    #Overlay the panel console onto the destination console
     panel_con.blit(dest=dest_con, width=screen_width, height=panel_height, dest_y=panel_y)
 
-def render_all_outdoors(source_con, dest_con, panel_con, entities_list, player, game_map, fov_map, fov_recompute, screen_width, screen_height, kolors, game_type, interface_skin, hp_bar_width, panel_height, panel_y):
+def render_all_outdoors(source_con, dest_con, panel_con, entities_list, player, game_map, fov_map, fov_recompute, message_log, screen_width, screen_height, kolors, game_type, interface_skin, hp_bar_width, panel_height, panel_y):
     floor_char = chr(298) #256+32+10 (11th char, third row is the empty square)
     if fov_recompute:
         # Draw all the tiles in the game map
@@ -112,10 +122,20 @@ def render_all_outdoors(source_con, dest_con, panel_con, entities_list, player, 
     #Overlay the source console onto the destination console
     source_con.blit(dest=dest_con, width=screen_width, height=screen_height)
 
-    #Draw the HP counter
+    #Setup the panel console
     panel_con.default_bg = (tcod.black)
     tcod.console_clear(panel_con)
+
+    #Print the game messages, one line at a time
+    y = 1
+    for message in message_log.messages:
+        panel_con.print(x=message_log.x, y=y, string=message.text, fg=message.color, bg_blend=tcod.BKGND_NONE, alignment=tcod.LEFT)
+        y += 1
+
+    #Draw the HP counter
     render_bar(panel_con, 1, 1, hp_bar_width, 'HP', player.fighter.hp, player.fighter.max_hp, tcod.light_red, tcod.darker_red)
+
+    #Overlay the panel console onto the destination console
     panel_con.blit(dest=dest_con, width=screen_width, height=panel_height, dest_y=panel_y)
 
 def draw_terrain(source_con, game_map, kolors, x, y, shade):
