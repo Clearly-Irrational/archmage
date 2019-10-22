@@ -24,6 +24,7 @@ def main():
     color_palette = Palette()
     kolors = color_palette.get_colors()
     mod_key = 'none'
+    mouse = 'none'
     
     #Build and initialize the random monster rosters
     cr = RosterLists()
@@ -63,7 +64,7 @@ def main():
         color_palette.set_color('dark_wall', 70, 130, 180)
         color_palette.set_color('dark_ground', 70, 130, 180)
 
-    map_type = 'World' #Choices: Dungeon, Cave, World
+    map_type = 'Dungeon' #Choices: Dungeon, Cave, World
 
     if map_type == 'Dungeon':
         indoors = True
@@ -95,7 +96,7 @@ def main():
             recompute_fov(fov_map, player.x, player.y, fov_radius, fov_light_walls, fov_algorithm)
 
         #Render all entities & tiles on main console and blit them to the root console
-        render_all(main_con, root_con, panel_con, entities, player, game_map, fov_map, fov_recompute, message_log, constants['screen_width'], constants['screen_height'], kolors, game_type, interface_skin, indoors, constants['hp_bar_width'], constants['panel_height'], constants['panel_y'])
+        render_all(main_con, root_con, panel_con, entities, player, game_map, fov_map, fov_recompute, message_log, constants['screen_width'], constants['screen_height'], kolors, game_type, interface_skin, indoors, constants['hp_bar_width'], constants['panel_height'], constants['panel_y'], mouse)
 
         #Reset FOV check
         fov_recompute = False
@@ -117,6 +118,11 @@ def main():
                 if event.mod == True and event.sym == 1073742049:
                     mod_key = 'l_shift'
                 action = handle_keys(event, mod_key)
+            elif event.type == "MOUSEMOTION": #Mouse was moved
+                mouse = event.tile
+            #else:
+                #print(event)
+
 
         #Get action type
         move = action.get('move')
@@ -170,6 +176,8 @@ def main():
                 fov_map = initialize_fov(game_map)
                 fov_recompute = True
                 main_con.clear(fg=(0, 0, 0))
+            else:
+                game_state = GameStates.ENEMY_TURN
 
         #Process player turn results
         for player_turn_result in player_turn_results:

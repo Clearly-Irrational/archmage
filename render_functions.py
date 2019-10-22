@@ -7,6 +7,15 @@ class RenderOrder(Enum):
     ITEM = 2
     ACTOR = 3
 
+def get_names_under_mouse(mouse, entities_list, fov_map):
+    (x, y) = (mouse[0], mouse[1])
+
+    names = [entity.name for entity in entities_list
+             if entity.x == x and entity.y == y and tcod.map_is_in_fov(fov_map, entity.x, entity.y)]
+    names = ', '.join(names)
+
+    return names.capitalize()
+
 def render_bar(panel_con, x, y, total_width, name, value, maximum, bar_color, back_color):
     #Figure out how wide the bar should be
     bar_width = int(float(value) / maximum * total_width)
@@ -22,11 +31,11 @@ def render_bar(panel_con, x, y, total_width, name, value, maximum, bar_color, ba
     tcod.console_print_ex(panel_con, int(x + total_width / 2), y, tcod.BKGND_NONE, tcod.CENTER, '{0}: {1}/{2}'.format(name, value, maximum))
 
 #Draw all entities in the list
-def render_all(source_con, dest_con, panel_con, entities_list, player, game_map, fov_map, fov_recompute, message_log, screen_width, screen_height, kolors, game_type, interface_skin, indoors, hp_bar_width, panel_height, panel_y):
+def render_all(source_con, dest_con, panel_con, entities_list, player, game_map, fov_map, fov_recompute, message_log, screen_width, screen_height, kolors, game_type, interface_skin, indoors, hp_bar_width, panel_height, panel_y, mouse):
     if indoors == True:
-        render_all_indoors(source_con, dest_con, panel_con, entities_list, player, game_map, fov_map, fov_recompute, message_log, screen_width, screen_height, kolors, game_type, interface_skin, hp_bar_width, panel_height, panel_y)
+        render_all_indoors(source_con, dest_con, panel_con, entities_list, player, game_map, fov_map, fov_recompute, message_log, screen_width, screen_height, kolors, game_type, interface_skin, hp_bar_width, panel_height, panel_y, mouse)
     if indoors == False:
-        render_all_outdoors(source_con, dest_con, panel_con, entities_list, player, game_map, fov_map, fov_recompute, message_log, screen_width, screen_height, kolors, game_type, interface_skin, hp_bar_width, panel_height, panel_y)
+        render_all_outdoors(source_con, dest_con, panel_con, entities_list, player, game_map, fov_map, fov_recompute, message_log, screen_width, screen_height, kolors, game_type, interface_skin, hp_bar_width, panel_height, panel_y, mouse)
 
 #Clear all entities in the list
 def clear_all(source_con, entities_list):
@@ -45,7 +54,7 @@ def draw_entity(source_con, entity, fov_map):
 def clear_entity(source_con, entity):
     tcod.console_put_char(source_con, entity.x, entity.y, ' ', tcod.BKGND_NONE)
 
-def render_all_indoors(source_con, dest_con, panel_con, entities_list, player, game_map, fov_map, fov_recompute, message_log, screen_width, screen_height, kolors, game_type, interface_skin, hp_bar_width, panel_height, panel_y):
+def render_all_indoors(source_con, dest_con, panel_con, entities_list, player, game_map, fov_map, fov_recompute, message_log, screen_width, screen_height, kolors, game_type, interface_skin, hp_bar_width, panel_height, panel_y, mouse):
     floor_char = chr(298) #256+32+10 (11th char, third row is the empty square)
     if fov_recompute:
         # Draw all the tiles in the game map
@@ -92,10 +101,13 @@ def render_all_indoors(source_con, dest_con, panel_con, entities_list, player, g
     #Draw the HP counter
     render_bar(panel_con, 1, 1, hp_bar_width, 'HP', player.fighter.hp, player.fighter.max_hp, tcod.light_red, tcod.darker_red)
 
+    #Write the name of the entity under the mouse cursor
+    panel_con.print(x=1, y=0, string=get_names_under_mouse(mouse, entities_list, fov_map), fg=tcod.light_gray, bg_blend=tcod.BKGND_NONE, alignment=tcod.LEFT)
+
     #Overlay the panel console onto the destination console
     panel_con.blit(dest=dest_con, width=screen_width, height=panel_height, dest_y=panel_y)
 
-def render_all_outdoors(source_con, dest_con, panel_con, entities_list, player, game_map, fov_map, fov_recompute, message_log, screen_width, screen_height, kolors, game_type, interface_skin, hp_bar_width, panel_height, panel_y):
+def render_all_outdoors(source_con, dest_con, panel_con, entities_list, player, game_map, fov_map, fov_recompute, message_log, screen_width, screen_height, kolors, game_type, interface_skin, hp_bar_width, panel_height, panel_y, mouse):
     floor_char = chr(298) #256+32+10 (11th char, third row is the empty square)
     if fov_recompute:
         # Draw all the tiles in the game map
@@ -134,6 +146,9 @@ def render_all_outdoors(source_con, dest_con, panel_con, entities_list, player, 
 
     #Draw the HP counter
     render_bar(panel_con, 1, 1, hp_bar_width, 'HP', player.fighter.hp, player.fighter.max_hp, tcod.light_red, tcod.darker_red)
+
+    #Write the name of the entity under the mouse cursor
+    panel_con.print(x=1, y=0, string=get_names_under_mouse(mouse, entities_list, fov_map), fg=tcod.light_gray, bg_blend=tcod.BKGND_NONE, alignment=tcod.LEFT)
 
     #Overlay the panel console onto the destination console
     panel_con.blit(dest=dest_con, width=screen_width, height=panel_height, dest_y=panel_y)
