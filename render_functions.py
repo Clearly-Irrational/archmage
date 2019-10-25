@@ -37,6 +37,33 @@ def render_all(source_con, dest_con, panel_con, entities_list, player, game_map,
     if indoors == False:
         render_all_outdoors(source_con, dest_con, panel_con, entities_list, player, game_map, fov_map, fov_recompute, message_log, screen_width, screen_height, kolors, game_type, interface_skin, hp_bar_width, panel_height, panel_y, mouse)
 
+    #Draw all entities in the list
+    entities_in_render_order = sorted(entities_list, key=lambda x: x.render_order.value)
+    for entity in entities_in_render_order:
+        draw_entity(source_con, entity, fov_map)
+
+    #Overlay the source console onto the destination console
+    source_con.blit(dest=dest_con, width=screen_width, height=screen_height)
+
+    #Setup the panel console
+    panel_con.default_bg = (tcod.black)
+    tcod.console_clear(panel_con)
+
+    #Print the game messages, one line at a time
+    y = 1
+    for message in message_log.messages:
+        panel_con.print(x=message_log.x, y=y, string=message.text, fg=message.color, bg_blend=tcod.BKGND_NONE, alignment=tcod.LEFT)
+        y += 1
+
+    #Draw the HP counter
+    render_bar(panel_con, 1, 1, hp_bar_width, 'HP', player.fighter.hp, player.fighter.max_hp, tcod.light_red, tcod.darker_red)
+
+    #Write the name of the entity under the mouse cursor
+    panel_con.print(x=1, y=0, string=get_names_under_mouse(mouse, entities_list, fov_map), fg=tcod.light_gray, bg_blend=tcod.BKGND_NONE, alignment=tcod.LEFT)
+
+    #Overlay the panel console onto the destination console
+    panel_con.blit(dest=dest_con, width=screen_width, height=panel_height, dest_y=panel_y)
+
 #Clear all entities in the list
 def clear_all(source_con, entities_list):
     for entity in entities_list:
@@ -80,32 +107,6 @@ def render_all_indoors(source_con, dest_con, panel_con, entities_list, player, g
                         tcod.console_set_char_background(source_con, x, y, kolors['purple_fill'], tcod.BKGND_SET)
                     else:
                         tcod.console_set_char_background(source_con, x, y, kolors['dark_ground'], tcod.BKGND_SET)
-    #Draw all entities in the list
-    entities_in_render_order = sorted(entities_list, key=lambda x: x.render_order.value)
-    for entity in entities_in_render_order:
-        draw_entity(source_con, entity, fov_map)
-
-    #Overlay the source console onto the destination console
-    source_con.blit(dest=dest_con, width=screen_width, height=screen_height)
-
-    #Setup the panel console
-    panel_con.default_bg = (tcod.black)
-    tcod.console_clear(panel_con)
-
-    #Print the game messages, one line at a time
-    y = 1
-    for message in message_log.messages:
-        panel_con.print(x=message_log.x, y=y, string=message.text, fg=message.color, bg_blend=tcod.BKGND_NONE, alignment=tcod.LEFT)
-        y += 1
-
-    #Draw the HP counter
-    render_bar(panel_con, 1, 1, hp_bar_width, 'HP', player.fighter.hp, player.fighter.max_hp, tcod.light_red, tcod.darker_red)
-
-    #Write the name of the entity under the mouse cursor
-    panel_con.print(x=1, y=0, string=get_names_under_mouse(mouse, entities_list, fov_map), fg=tcod.light_gray, bg_blend=tcod.BKGND_NONE, alignment=tcod.LEFT)
-
-    #Overlay the panel console onto the destination console
-    panel_con.blit(dest=dest_con, width=screen_width, height=panel_height, dest_y=panel_y)
 
 def render_all_outdoors(source_con, dest_con, panel_con, entities_list, player, game_map, fov_map, fov_recompute, message_log, screen_width, screen_height, kolors, game_type, interface_skin, hp_bar_width, panel_height, panel_y, mouse):
     floor_char = chr(298) #256+32+10 (11th char, third row is the empty square)
@@ -125,33 +126,6 @@ def render_all_outdoors(source_con, dest_con, panel_con, entities_list, player, 
                 elif game_map.tiles[x][y].explored or game_type == 'viewer':
                     shade = 'dark'
                     draw_terrain(source_con, game_map, kolors, x, y, shade)
-
-    #Draw all entities in the list
-    entities_in_render_order = sorted(entities_list, key=lambda x: x.render_order.value)
-    for entity in entities_in_render_order:
-        draw_entity(source_con, entity, fov_map)
-
-    #Overlay the source console onto the destination console
-    source_con.blit(dest=dest_con, width=screen_width, height=screen_height)
-
-    #Setup the panel console
-    panel_con.default_bg = (tcod.black)
-    tcod.console_clear(panel_con)
-
-    #Print the game messages, one line at a time
-    y = 1
-    for message in message_log.messages:
-        panel_con.print(x=message_log.x, y=y, string=message.text, fg=message.color, bg_blend=tcod.BKGND_NONE, alignment=tcod.LEFT)
-        y += 1
-
-    #Draw the HP counter
-    render_bar(panel_con, 1, 1, hp_bar_width, 'HP', player.fighter.hp, player.fighter.max_hp, tcod.light_red, tcod.darker_red)
-
-    #Write the name of the entity under the mouse cursor
-    panel_con.print(x=1, y=0, string=get_names_under_mouse(mouse, entities_list, fov_map), fg=tcod.light_gray, bg_blend=tcod.BKGND_NONE, alignment=tcod.LEFT)
-
-    #Overlay the panel console onto the destination console
-    panel_con.blit(dest=dest_con, width=screen_width, height=panel_height, dest_y=panel_y)
 
 def draw_terrain(source_con, game_map, kolors, x, y, shade):
     tree_char = chr(288) #256+32 (1st char, third row is the up arrow)
