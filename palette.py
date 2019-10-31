@@ -34,7 +34,8 @@ class Palette:
             'skeleton_white': Color(230, 230, 230),
             'zombie_black': Color(0, 0, 0),
             'ghoul_green': Color(63, 127, 63),
-            'banshee_blue': Color(0, 0, 127)
+            'banshee_blue': Color(0, 0, 127),
+            'potion_violet': Color(127, 0, 255)
         }
 
     def get_colors(self):

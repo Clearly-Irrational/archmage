@@ -69,11 +69,11 @@ def main():
     if map_type == 'Dungeon':
         indoors = True
         game_map = Dungeon(constants['map_width'], constants['map_height'])
-        game_map.make_map(constants['max_rooms'], constants['room_min_size'], constants['room_max_size'], constants['map_width'], constants['map_height'], player, entities, constants['max_monsters_per_room'], kolors, current_roster, current_mm)
+        game_map.make_map(constants['max_rooms'], constants['room_min_size'], constants['room_max_size'], constants['map_width'], constants['map_height'], player, entities, constants['max_monsters_per_room'], constants['max_items_per_room'], kolors, current_roster, current_mm)
     elif map_type == 'Cave':
         indoors = True
         game_map = Cave(constants['map_width'], constants['map_height'])
-        game_map.make_cave(constants['map_width'], constants['map_height'], player, entities, constants['max_monsters_per_cave'], kolors, current_roster, current_mm)
+        game_map.make_cave(constants['map_width'], constants['map_height'], player, entities, constants['max_monsters_per_cave'], constants['max_items_per_cave'], kolors, current_roster, current_mm)
     elif map_type == 'World':
         indoors = False
         game_map = World(constants['map_width'], constants['map_height'])

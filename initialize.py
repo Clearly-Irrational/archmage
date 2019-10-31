@@ -26,9 +26,11 @@ def get_constants():
     room_min_size = 4
     max_rooms = 180
     max_monsters_per_room = 3
+    max_items_per_room = 2
 
     #Caves
     max_monsters_per_cave = 5
+    max_items_per_cave = 3
 
     #World
     max_monsters_per_spawn = 8
@@ -54,7 +56,9 @@ def get_constants():
         'max_rooms': max_rooms,
         'max_monsters_per_room': max_monsters_per_room,
         'max_monsters_per_cave': max_monsters_per_cave,
-        'max_monsters_per_spawn': max_monsters_per_spawn
+        'max_monsters_per_spawn': max_monsters_per_spawn,
+        'max_items_per_room': max_items_per_room,
+        'max_items_per_cave': max_items_per_cave
     }
 
     return constants

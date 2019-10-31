@@ -10,6 +10,8 @@ from entity import Entity
 from render_functions import RenderOrder
 from generator import gen_monster, roll_monster
 
+#Note need to replace entities with entities_list to be consistent
+
 class Cave(GameMap):
 ##################################################
 #####Generate a cellular automata cave system#####
@@ -21,7 +23,7 @@ class Cave(GameMap):
     checked = []
     cave_min_size = 1 #Size in tiles
 
-    def make_cave(self, map_width, map_height, player, entities, max_monsters_per_area, kolors, current_roster, current_mm):
+    def make_cave(self, map_width, map_height, player, entities, max_monsters_per_area, max_items_per_area, kolors, current_roster, current_mm):
         #Generator variables
         #40, 5, 5, 5 works passably
         initialy_open_chance = 40
@@ -60,7 +62,7 @@ class Cave(GameMap):
 
         #Add monsters
         for cur_cave in self.caves:
-            self.place_entities(cur_cave, entities, max_monsters_per_area, kolors, current_roster, current_mm)
+            self.place_entities(cur_cave, entities, max_monsters_per_area, max_items_per_area, kolors, current_roster, current_mm)
 
     #Next pass
     def next_pass(self, map_width, map_height, wall_create_threshold, wall_remove_threshold):
@@ -87,7 +89,7 @@ class Cave(GameMap):
     def next_map(self, player, map_type, constants, entities, kolors, current_roster, current_mm):
         entities = [player]
         self.tiles = self.initialize_tiles()
-        self.make_cave(constants['map_width'], constants['map_height'], player, entities, constants['max_monsters_per_cave'], kolors, current_roster, current_mm)
+        self.make_cave(constants['map_width'], constants['map_height'], player, entities, constants['max_monsters_per_cave'], constants['max_items_per_cave'], kolors, current_roster, current_mm)
         return entities
 
     def get_caves(self, map_width, map_height):
@@ -266,9 +268,10 @@ class Cave(GameMap):
 
         return wall_counter
 
-    def place_entities(self, area, entities, max_monsters_per_area, kolors, current_roster, current_mm):
+    def place_entities(self, area, entities, max_monsters_per_area, max_items_per_area, kolors, current_roster, current_mm):
         # Get a random number of monsters
         number_of_monsters = randint(0, max_monsters_per_area)
+        number_of_items = randint(0, max_items_per_area)
             
         for i in range(0, number_of_monsters):
             for coord in area: break #Get an element from area
@@ -288,3 +291,14 @@ class Cave(GameMap):
                 monster = Entity(x, y, m_loader['display_char'], kolors[m_loader['color']], m_loader['display_name'], blocks=True, fighter=fighter_component, render_order=RenderOrder.ACTOR, ai=ai_component)
                 #Append the monster to the list of entities
                 entities.append(monster)
+
+        for i in range(0, number_of_items):
+            for coord in area: break #Get an element from area
+            (x, y) = coord
+
+            if not any([entity for entity in entities if entity.x == x and entity.y == y]):
+                #Create the item entity
+                item = Entity(x, y, '!', kolors['potion_violet'], 'Healing Potion', render_order=RenderOrder.ITEM)
+
+                #Append the item to the list of entities
+                entities.append(item)

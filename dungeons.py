@@ -10,11 +10,13 @@ from entity import Entity
 from render_functions import RenderOrder
 from generator import gen_monster, roll_monster
 
+#Note, need to replace entities with entities_list to stay consistent
+
 class Dungeon(GameMap):
 ########################################
 #####Generate a traditional dungeon#####
 ########################################
-    def make_map(self, max_rooms, room_min_size, room_max_size, map_width, map_height, player, entities, max_monsters_per_area, kolors, current_roster, current_mm):
+    def make_map(self, max_rooms, room_min_size, room_max_size, map_width, map_height, player, entities, max_monsters_per_area, max_items_per_area, kolors, current_roster, current_mm):
         rooms = []
         num_rooms = 0
 
@@ -55,7 +57,7 @@ class Dungeon(GameMap):
                         self.build_tunnel(prev_x, prev_y, new_x, new_y) 
 
                 #Add monsters
-                self.place_entities(new_room, entities, max_monsters_per_area, kolors, current_roster, current_mm)
+                self.place_entities(new_room, entities, max_monsters_per_area, max_items_per_area, kolors, current_roster, current_mm)
                 # finally, append the new room to the list
                 rooms.append(new_room)
                 num_rooms += 1
@@ -146,12 +148,13 @@ class Dungeon(GameMap):
     def next_map(self, player, map_type, constants, entities, kolors, current_roster, current_mm):
         entities = [player]
         self.tiles = self.initialize_tiles()
-        self.make_map(constants['max_rooms'], constants['room_min_size'], constants['room_max_size'], constants['map_width'], constants['map_height'], player, entities, constants['max_monsters_per_room'], kolors, current_roster, current_mm)
+        self.make_map(constants['max_rooms'], constants['room_min_size'], constants['room_max_size'], constants['map_width'], constants['map_height'], player, entities, constants['max_monsters_per_room'], constants['max_items_per_room'], kolors, current_roster, current_mm)
         return entities
 
-    def place_entities(self, area, entities, max_monsters_per_area, kolors, current_roster, current_mm):
+    def place_entities(self, area, entities, max_monsters_per_area, max_items_per_area, kolors, current_roster, current_mm):
         # Get a random number of monsters
         number_of_monsters = randint(0, max_monsters_per_area)
+        number_of_items = randint(0, max_items_per_area)
 
         for i in range(0, number_of_monsters):
             # Choose a random location in the area
@@ -172,3 +175,14 @@ class Dungeon(GameMap):
                 monster = Entity(x, y, m_loader['display_char'], kolors[m_loader['color']], m_loader['display_name'], blocks=True, fighter=fighter_component, render_order=RenderOrder.ACTOR, ai=ai_component)
                 #Append the monster to the list of entities
                 entities.append(monster)
+
+        for i in range(0, number_of_items):
+            # Choose a random location in the area
+            x = randint(area.x1 + 1, area.x2 - 1)
+            y = randint(area.y1 + 1, area.y2 - 1)
+
+            if not any([entity for entity in entities if entity.x == x and entity.y == y]):
+                #Create the item entity
+                item = Entity(x, y, '!', kolors['potion_violet'], 'Healing Potion', render_order=RenderOrder.ITEM)
+                #Append the item to the list of entities
+                entities.append(item)
