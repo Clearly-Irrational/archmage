@@ -5,6 +5,7 @@ from rectangle import Rect
 from tile import Tile
 from game_map import GameMap
 from fighter import Fighter
+from item import Item
 from ai import BasicMonster
 from entity import Entity
 from render_functions import RenderOrder
@@ -183,6 +184,7 @@ class Dungeon(GameMap):
 
             if not any([entity for entity in entities if entity.x == x and entity.y == y]):
                 #Create the item entity
-                item = Entity(x, y, '!', kolors['potion_violet'], 'Healing Potion', render_order=RenderOrder.ITEM)
+                item_component = Item()
+                item = Entity(x, y, '!', kolors['potion_violet'], 'Healing Potion', render_order=RenderOrder.ITEM, item=item_component)
                 #Append the item to the list of entities
                 entities.append(item)

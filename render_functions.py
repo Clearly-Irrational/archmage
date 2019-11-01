@@ -1,6 +1,9 @@
 import tcod
 from enum import Enum
 
+from game_states import GameStates
+from menus import inventory_menu
+
 #Set the entity render order
 class RenderOrder(Enum):
     CORPSE = 1
@@ -31,7 +34,7 @@ def render_bar(panel_con, x, y, total_width, name, value, maximum, bar_color, ba
     tcod.console_print_ex(panel_con, int(x + total_width / 2), y, tcod.BKGND_NONE, tcod.CENTER, '{0}: {1}/{2}'.format(name, value, maximum))
 
 #Draw all entities in the list
-def render_all(source_con, dest_con, panel_con, entities_list, player, game_map, fov_map, fov_recompute, message_log, screen_width, screen_height, kolors, game_type, interface_skin, indoors, hp_bar_width, panel_height, panel_y, mouse):
+def render_all(source_con, dest_con, panel_con, entities_list, player, game_map, fov_map, fov_recompute, message_log, screen_width, screen_height, kolors, game_type, interface_skin, indoors, hp_bar_width, panel_height, panel_y, mouse, game_state):
     if indoors == True:
         render_all_indoors(source_con, dest_con, panel_con, entities_list, player, game_map, fov_map, fov_recompute, message_log, screen_width, screen_height, kolors, game_type, interface_skin, hp_bar_width, panel_height, panel_y, mouse)
     if indoors == False:
@@ -63,6 +66,9 @@ def render_all(source_con, dest_con, panel_con, entities_list, player, game_map,
 
     #Overlay the panel console onto the destination console
     panel_con.blit(dest=dest_con, width=screen_width, height=panel_height, dest_y=panel_y)
+
+    if game_state == GameStates.SHOW_INVENTORY:
+        inventory_menu(dest_con, 'Press the key next to an item to use it, or Esc to cancel.\n', player.inventory, 50, screen_width, screen_height)
 
 #Clear all entities in the list
 def clear_all(source_con, entities_list):

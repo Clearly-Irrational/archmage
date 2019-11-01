@@ -1,6 +1,18 @@
 import tcod
 
-def handle_keys(event, mod_key):
+from game_states import GameStates
+
+def handle_keys(event, mod_key, game_state):
+    if game_state == GameStates.PLAYERS_TURN:
+        return handle_player_turn_keys(event, mod_key)
+    elif game_state == GameStates.PLAYER_DEAD:
+        return handle_player_dead_keys(event, mod_key)
+    elif game_state == GameStates.SHOW_INVENTORY:
+        return handle_inventory_keys(event, mod_key)
+
+    return {}
+
+def handle_player_turn_keys(event, mod_key):
     keypress = event.sym
 
     #Action keys
@@ -25,11 +37,39 @@ def handle_keys(event, mod_key):
             return {'move': (1, 0)}
         elif keypress == 116: #t third eye mode
             return {'vision': 'third eye'}
+        elif keypress == 103: #g get
+            return {'pickup': True}
+        elif keypress == 105: #i inventory
+            return {'show_inventory': True}
         elif keypress == 32: #space wait or generate new map in viewer mode
             return {'wait': True}
+        elif keypress == 27: #esc exit
+            return {'exit': 'menu'}
         else:
             print("Unknown key", "Scancode=", event.scancode, "Symbol=", event.sym, "Mod=", event.mod, "Repeat=", event.repeat)
             print(event)
             return {'Unknown_Key': True}
         #Somehow we got here even though no key was pressed
         return {'error': "handle_keys - no key pressed"}
+
+def handle_player_dead_keys(event, mod_key):
+    keypress = event.sym
+
+    if keypress == 105: #i inventory
+        return {'show_inventory': True}
+    elif keypress == 27: #esc exit
+        return {'exit': 'menu'}
+
+    return {}
+
+def handle_inventory_keys(event, mod_key):
+    keypress = event.sym
+    index = keypress - ord('a')
+
+    if index >= 0:
+        return {'inventory_index': index}
+
+    if keypress == 27: #esc exit
+        return {'exit': 'menu'}
+
+    return {} 

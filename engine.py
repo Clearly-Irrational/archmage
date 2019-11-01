@@ -2,6 +2,7 @@ import tcod
 import tcod.event
 
 from fighter import Fighter
+from inventory import Inventory
 from death_functions import kill_monster, kill_player
 from entity import Entity, get_blocking_entities_at_location
 from fov_functions import initialize_fov, recompute_fov
@@ -16,7 +17,7 @@ from dungeons import Dungeon
 from world import World
 from vision import third_eye
 from generator import RosterLists
-from game_messages import MessageLog
+from game_messages import Message, MessageLog
 
 def main():
     #Set the initial variables
@@ -50,7 +51,8 @@ def main():
 
     #Initialize entities
     fighter_component = Fighter(hp=30, protection=2, power=5)
-    player = Entity(0, 0, '@', tcod.black, 'Player', blocks=True, render_order=RenderOrder.ACTOR, fighter=fighter_component)
+    inventory_component = Inventory(26)
+    player = Entity(0, 0, '@', tcod.black, 'Player', blocks=True, render_order=RenderOrder.ACTOR, fighter=fighter_component, inventory=inventory_component)
     entities = [player]
 
     #Initialize the map
@@ -64,7 +66,7 @@ def main():
         color_palette.set_color('dark_wall', 70, 130, 180)
         color_palette.set_color('dark_ground', 70, 130, 180)
 
-    map_type = 'Cave' #Choices: Dungeon, Cave, World
+    map_type = 'Dungeon' #Choices: Dungeon, Cave, World
 
     if map_type == 'Dungeon':
         indoors = True
@@ -89,6 +91,7 @@ def main():
 
     #Initialize main loop
     game_state = GameStates.PLAYERS_TURN
+    previous_game_state = game_state
     end_game = False
     while not end_game:
         #Recomput FOV if necessary
@@ -96,7 +99,7 @@ def main():
             recompute_fov(fov_map, player.x, player.y, fov_radius, fov_light_walls, fov_algorithm)
 
         #Render all entities & tiles on main console and blit them to the root console
-        render_all(main_con, root_con, panel_con, entities, player, game_map, fov_map, fov_recompute, message_log, constants['screen_width'], constants['screen_height'], kolors, game_type, interface_skin, indoors, constants['hp_bar_width'], constants['panel_height'], constants['panel_y'], mouse)
+        render_all(main_con, root_con, panel_con, entities, player, game_map, fov_map, fov_recompute, message_log, constants['screen_width'], constants['screen_height'], kolors, game_type, interface_skin, indoors, constants['hp_bar_width'], constants['panel_height'], constants['panel_y'], mouse, game_state)
 
         #Reset FOV check
         fov_recompute = False
@@ -117,7 +120,7 @@ def main():
             elif event.type == "KEYDOWN": #A key was depressed
                 if event.mod == True and event.sym == 1073742049:
                     mod_key = 'l_shift'
-                action = handle_keys(event, mod_key)
+                action = handle_keys(event, mod_key, game_state)
             elif event.type == "MOUSEMOTION": #Mouse was moved
                 mouse = event.tile
             #else:
@@ -126,6 +129,9 @@ def main():
 
         #Get action type
         move = action.get('move')
+        pickup = action.get('pickup')
+        show_inventory = action.get('show_inventory')
+        inventory_index = action.get('inventory_index')
         exit = action.get('exit')
         error = action.get('error')
         wait = action.get('wait')
@@ -151,9 +157,31 @@ def main():
                     #Recalculate FOV if player moves
                     fov_recompute = True
                 game_state = GameStates.ENEMY_TURN
+        elif pickup and game_state == GameStates.PLAYERS_TURN:
+            for entity in entities:
+                if entity.item and entity.x == player.x and entity.y == player.y:
+                    pickup_results = player.inventory.add_item(entity)
+                    player_turn_results.extend(pickup_results)
+ 
+                    break
+            else:
+                message_log.add_message(Message('There is nothing here to pick up.', tcod.yellow))
+
+        if show_inventory:
+            previous_game_state = game_state
+            game_state = GameStates.SHOW_INVENTORY
+
+        if inventory_index is not None and previous_game_state != GameStates.PLAYER_DEAD and inventory_index < len(
+                player.inventory.items):
+            item = player.inventory.items[inventory_index]
+            print(item)
 
         if exit:
-            end_game = True
+            if exit == 'menu' and game_state == GameStates.SHOW_INVENTORY:
+                game_state = previous_game_state
+            else:
+                if exit == True:
+                    end_game = True
 
         if error:
             error_text = error
@@ -183,6 +211,7 @@ def main():
         for player_turn_result in player_turn_results:
             message = player_turn_result.get('message')
             dead_entity = player_turn_result.get('dead')
+            item_added = player_turn_result.get('item_added')
 
             if message:
                 message_log.add_message(message)
@@ -194,6 +223,11 @@ def main():
                     message = kill_monster(dead_entity)
 
                 message_log.add_message(message)
+
+            if item_added:
+                entities.remove(item_added)
+
+                game_state = GameStates.ENEMY_TURN
 
         #Enemy turn
         if game_state == GameStates.ENEMY_TURN:
