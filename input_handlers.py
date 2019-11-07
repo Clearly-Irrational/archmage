@@ -7,7 +7,7 @@ def handle_keys(event, mod_key, game_state):
         return handle_player_turn_keys(event, mod_key)
     elif game_state == GameStates.PLAYER_DEAD:
         return handle_player_dead_keys(event, mod_key)
-    elif game_state == GameStates.SHOW_INVENTORY:
+    elif game_state in (GameStates.SHOW_INVENTORY, GameStates.DROP_INVENTORY):
         return handle_inventory_keys(event, mod_key)
 
     return {}
@@ -25,6 +25,8 @@ def handle_player_turn_keys(event, mod_key):
             return {'move': (-1, 1)}
         elif keypress == 100: #D move right and up
             return {'move': (1, -1)}
+        elif keypress == 103: #G get rid of item
+            return {'drop_inventory': True}
         return {'Unknown_Key': True}
     else:
         if keypress == 119: #w move up
@@ -37,7 +39,7 @@ def handle_player_turn_keys(event, mod_key):
             return {'move': (1, 0)}
         elif keypress == 116: #t third eye mode
             return {'vision': 'third eye'}
-        elif keypress == 103: #g get
+        elif keypress == 103: #g grab an item
             return {'pickup': True}
         elif keypress == 105: #i inventory
             return {'show_inventory': True}

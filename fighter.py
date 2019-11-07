@@ -20,6 +20,13 @@ class Fighter:
 
         return results
 
+    def heal(self, amount):
+        self.hp += amount
+
+        #No overhealing allowed
+        if self.hp > self.max_hp:
+            self.hp = self.max_hp
+
     def attack(self, target):
         #List to store the results of damage
         results = []

@@ -67,8 +67,13 @@ def render_all(source_con, dest_con, panel_con, entities_list, player, game_map,
     #Overlay the panel console onto the destination console
     panel_con.blit(dest=dest_con, width=screen_width, height=panel_height, dest_y=panel_y)
 
-    if game_state == GameStates.SHOW_INVENTORY:
-        inventory_menu(dest_con, 'Press the key next to an item to use it, or Esc to cancel.\n', player.inventory, 50, screen_width, screen_height)
+    if game_state in (GameStates.SHOW_INVENTORY, GameStates.DROP_INVENTORY):
+        if game_state == GameStates.SHOW_INVENTORY:
+           inventory_title = 'Press item letter to use, or Esc to cancel.\n'
+        else:
+           inventory_title = 'Press item letter to drop it, or Esc to cancel.\n'
+
+        inventory_menu(dest_con, inventory_title, player.inventory, 50, screen_width, screen_height)
 
 #Clear all entities in the list
 def clear_all(source_con, entities_list):
