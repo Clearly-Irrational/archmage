@@ -1,4 +1,4 @@
-from random import randint
+from random import randint, shuffle
 from operator import methodcaller
 
 from rectangle import Rect
@@ -20,7 +20,9 @@ class Dungeon(GameMap):
 ########################################
     def make_map(self, max_rooms, room_min_size, room_max_size, map_width, map_height, player, entities, max_monsters_per_area, max_items_per_area, kolors, current_roster, current_mm):
         rooms = []
+        connected_rooms = []
         num_rooms = 0
+        tunnel_built = False
 
         for r in range(max_rooms):
             # random width and height
@@ -31,9 +33,11 @@ class Dungeon(GameMap):
             y = randint(0, map_height - h - 1)
 
             # "Rect" class makes rectangles easier to work with
+            if num_rooms > 0:
+                prev_room = new_room
             new_room = Rect(x, y, w, h)
 
-            # run through the other rooms and see if they intersect with this one
+            # Go through the room list  and see if they intersect with this one
             for other_room in rooms:
                 if new_room.intersect(other_room):
                     break
@@ -51,12 +55,18 @@ class Dungeon(GameMap):
                     player.y = new_y
                 else:
                     # all rooms after the first:
-                    #Sometimes connect it to the previous room with a tunnel
-                    if randint(0, 2) == 2:
-                        # center coordinates of previous room
-                        (prev_x, prev_y) = rooms[num_rooms - 1].center()
-                        #Build a tunnel between rooms
-                        self.build_tunnel(prev_x, prev_y, new_x, new_y) 
+                    #connect to the previous room with a tunnel if nearby
+                    # center coordinates of previous room
+                    (prev_x, prev_y) = rooms[num_rooms - 1].center()
+                    #Build a tunnel between rooms
+                    dist_threshold = 50
+                    tunnel_built = self.build_tunnel(prev_x, prev_y, new_x, new_y, dist_threshold) 
+                    #Keep track of connected rooms
+                    if tunnel_built == True:
+                        if new_room.center() not in connected_rooms:
+                            connected_rooms.append(new_room.center())
+                        if prev_room.center() not in connected_rooms:
+                            connected_rooms.append(prev_room.center())
 
                 #Add monsters
                 self.place_entities(new_room, entities, max_monsters_per_area, max_items_per_area, kolors, current_roster, current_mm)
@@ -64,17 +74,37 @@ class Dungeon(GameMap):
                 rooms.append(new_room)
                 num_rooms += 1
 
-        rooms.sort(key=methodcaller('center'))
-        first_room = True
-        for cur_room in range(0, len(rooms)):
-            if first_room == True:
-                first_room = False
-            else:
-                (prev_x, prev_y) = rooms[cur_room - 1].center()
-                (cur_x, cur_y) = rooms[cur_room].center()
+        #Add short corridors
+        for i in range(0, 30):
+            shuffle(rooms)
+            first_room = True
+            for cur_room in range(0, len(rooms)):
+                if first_room == True:
+                    first_room = False
+                else:
+                    (prev_x, prev_y) = rooms[cur_room - 1].center()
+                    (cur_x, cur_y) = rooms[cur_room].center()
+                    dist_threshold = 25
+                    tunnel_built = self.build_tunnel(prev_x, prev_y, cur_x, cur_y, dist_threshold)
+                    #Keep track of connected rooms
+                    if tunnel_built == True:
+                        if rooms[cur_room].center() not in connected_rooms:
+                            connected_rooms.append(rooms[cur_room].center())
+                        if rooms[cur_room-1].center() not in connected_rooms:
+                            connected_rooms.append(rooms[cur_room-1].center())
 
-                if randint(0, 2) == 2:
-                    self.build_tunnel(prev_x, prev_y, cur_x, cur_y)
+        #Connect orphan rooms
+        for cur_room in range(0, len(rooms)):
+            tunnel_built = False
+            if rooms[cur_room].center() not in connected_rooms:
+                for i in range(0, 1000):
+                    rand_room = randint(0, len(rooms) - 1)
+                    (rand_x, rand_y) = rooms[rand_room - 1].center()
+                    (cur_x, cur_y) = rooms[cur_room].center()
+                    dist_threshold = 50
+                    tunnel_built = self.build_tunnel(rand_x, rand_y, cur_x, cur_y, dist_threshold)
+                    if tunnel_built == True:
+                        break
 
     #Generate a walkable rectangular room
     def create_room(self, room):
@@ -100,52 +130,25 @@ class Dungeon(GameMap):
             self.tiles[x][y].block_sight = False
 
     #Combines the tunneling methods available to create a random tunnel
-    def build_tunnel(self, prev_x, prev_y, new_x, new_y):
-        mid_x = int(new_x / 2)
-        mid_y = int(new_x / 2)
+    def build_tunnel(self, prev_x, prev_y, new_x, new_y, dist_threshold):
+        diff_x = abs(prev_x - new_x)
+        diff_y = abs(prev_y - new_y)
+        dist_xy = diff_x + diff_y
+
         # flip a coin (random number that is either 0 or 1)
-        flip = randint(0, 2)
-        if flip == 0:
-            # first move horizontally, then vertically
-            self.create_h_tunnel(prev_x, new_x, prev_y)
-            self.create_v_tunnel(prev_y, new_y, new_x)
-        elif flip == 1:
-            # first move vertically, then horizontally
-            self.create_v_tunnel(prev_y, new_y, prev_x)
-            self.create_h_tunnel(prev_x, new_x, new_y)
-        elif flip == 2:
-            flip2 = randint(0, 2)
-            if flip2 == 0:
-                #Double bend tunnel, horizontal first
-                self.create_h_tunnel(prev_x, mid_x, prev_y)
-                self.create_v_tunnel(prev_y, mid_y, mid_x)
-                self.create_h_tunnel(mid_x, new_x, mid_y)
-                self.create_v_tunnel(mid_y, new_y, new_x)
-            elif flip2 == 1:
-                #Double bend tunnel, vertical first
-                self.create_v_tunnel(prev_y, mid_y, prev_x)
-                self.create_h_tunnel(prev_x, mid_x, mid_y)
-                self.create_v_tunnel(mid_y, new_y, mid_x)
-                self.create_h_tunnel(mid_x, new_x, new_y)
-            else:
-                #Creates a possible dead end
-                mid_x = int(mid_x / 2)
-                mid_y = int(mid_y /2)
-                flip3 = randint(0, 2)
-                if flip3 == 0:
-                    self.create_h_tunnel(prev_x, mid_x, prev_y)
-                elif flip3 == 1:
-                    self.create_v_tunnel(prev_y, mid_y, mid_x)
-                else:
-                    new_x = int(new_x / 2)
-                    new_y = int(new_y / 2)
-                    flip4 = randint(0, 1)
-                    if flip4 == 0:
-                        self.create_h_tunnel(prev_x, mid_x, prev_y)
-                        self.create_v_tunnel(mid_y, new_y, new_x)
-                    else: 
-                        self.create_v_tunnel(mid_y, new_y, new_x)
-                        self.create_h_tunnel(prev_x, mid_x, prev_y)
+        if dist_xy < dist_threshold:
+            flip = randint(0, 1)
+            if flip == 0:
+                # first move horizontally, then vertically
+                self.create_h_tunnel(prev_x, new_x, prev_y)
+                self.create_v_tunnel(prev_y, new_y, new_x)
+            elif flip == 1:
+                # first move vertically, then horizontally
+                self.create_v_tunnel(prev_y, new_y, prev_x)
+                self.create_h_tunnel(prev_x, new_x, new_y)
+            return True
+        else:
+            return False
 
     def next_map(self, player, map_type, constants, entities, kolors, current_roster, current_mm):
         entities = [player]
