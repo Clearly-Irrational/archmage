@@ -1,7 +1,8 @@
-from random import randint, shuffle
+from random import randint, randrange, shuffle
 from operator import methodcaller
 
 from rectangle import Rect
+from hexagon import Hex
 from tile import Tile
 from game_map import GameMap
 from fighter import Fighter
@@ -25,17 +26,27 @@ class Dungeon(GameMap):
         tunnel_built = False
 
         for r in range(max_rooms):
-            # random width and height
-            w = randint(room_min_size, room_max_size)
-            h = randint(room_min_size, room_max_size)
-            # random position without going out of the boundaries of the map
-            x = randint(0, map_width - w - 1)
-            y = randint(0, map_height - h - 1)
-
-            # "Rect" class makes rectangles easier to work with
+            # "Rect" and "Hex" classes make shapes easier to work with
             if num_rooms > 0:
                 prev_room = new_room
-            new_room = Rect(x, y, w, h)
+            room_roll = randint(0, 99)
+            if room_roll < 75:
+                # random width and height
+                w = randint(room_min_size, room_max_size)
+                h = randint(room_min_size, room_max_size)
+                # random position without going out of the boundaries of the map
+                x = randint(0, map_width - w - 1)
+                y = randint(0, map_height - h - 1)
+                #Create new rectangular room
+                new_room = Rect(x, y, w, h)
+            else:
+                h = randrange(8, 14, 2)
+                w = int(h * 1.3)  #Fat hexagons look better than 1.1547 true
+                # random position without going out of the boundaries of the map
+                x = randint(0, map_width - w - 1)
+                y = randint(0, map_height - h - 1)
+                #Create new hexagonal room
+                new_room = Hex(x, y, w, h)
 
             # Go through the room list  and see if they intersect with this one
             for other_room in rooms:
@@ -106,14 +117,29 @@ class Dungeon(GameMap):
                     if tunnel_built == True:
                         break
 
-    #Generate a walkable rectangular room
+    #Generate a walkable rectangular or hexagonal room
     def create_room(self, room):
-        #Go through the tiles in the rectangle and make them passable
-        #+1 value ensures adjacent rooms will have a wall between them
-        for x in range(room.x1 + 1, room.x2):
+        if room.room_type == "rectangle":
+            #Go through the tiles in the rectangle and make them passable
+            #+1 value ensures adjacent rooms will have a wall between them
+            for x in range(room.x1 + 1, room.x2):
+                for y in range(room.y1 + 1, room.y2):
+                    self.tiles[x][y].blocked = False
+                    self.tiles[x][y].block_sight = False
+        #Thanks to aotdev from the roguelikedev forum for the basic idea
+        #Mine is implemented differently to avoid boundary issues
+        elif room.room_type == "hexagon":
+            ymid = (room.y1 + room.y2 + 1) //2 #Floor division
             for y in range(room.y1 + 1, room.y2):
-                self.tiles[x][y].blocked = False
-                self.tiles[x][y].block_sight = False
+                pattern = abs(y-ymid)
+                #Small nubs sticking out are ugly
+                if y == ymid:
+                    flat = 1
+                else:
+                    flat = 0
+                for x in range(room.x1 + 1 + pattern + flat, room.x2 - pattern - flat):
+                    self.tiles[x][y].blocked = False
+                    self.tiles[x][y].block_sight = False
 
     #Generate a walkable horizontal tunnel
     #x coordinates are not left/right, just represent the ends of a range
