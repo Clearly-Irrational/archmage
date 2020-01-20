@@ -84,7 +84,7 @@ def main():
     #Initialize FOV and calculate on start
     fov_recompute = True
     fov_map = initialize_fov(game_map)
-    game_type = 'viewer' #choices normal, viewer
+    game_type = 'normal' #choices normal, viewer
 
     #Initialize the message log
     message_log = MessageLog(constants['message_x'], constants['message_width'], constants['message_height'])

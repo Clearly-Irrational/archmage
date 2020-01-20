@@ -20,3 +20,14 @@ class Rect:
     def intersect(self, other):
         return (self.x1 <= other.x2 and self.x2 >= other.x1 and
                 self.y1 <= other.y2 and self.y2 >= other.y1)
+
+    #Find the edges of the room
+    def edge(self):
+        edge_list = []
+        for x in range(self.x1, self.x2+1):
+            for y in range(self.y1, self.y2+1):
+                if (x == self.x1) or (x == self.x2+1) or (y == self.y1) or (y == self.y2+1):
+                    cur_coord = (x, y)
+                if cur_coord not in edge_list:
+                    edge_list.append(cur_coord)
+        return edge_list 

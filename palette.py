@@ -6,7 +6,8 @@ class Palette:
             #indoors
             'dark_wall': Color(0, 0, 100),
             'dark_ground': Color(50, 50, 150),
-            'light_wall': Color(130, 110, 50),
+            #'light_wall': Color(130, 110, 50),
+            'light_wall': Color(0, 0, 250),
             'light_ground': Color(200, 180, 50),
             'purple_fill': Color(128, 0, 128),
             #outdoors

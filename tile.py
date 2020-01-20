@@ -6,6 +6,7 @@ class Tile:
         self.blocked = blocked
         self.explored = False
         self.floodfilled = False
+        self.door = False
         self.terrain = 0
         self.vegetation = 0
         

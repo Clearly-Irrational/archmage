@@ -101,13 +101,17 @@ def render_all_indoors(source_con, dest_con, panel_con, entities_list, player, g
                 visible = tcod.map_is_in_fov(fov_map, x, y)
                 #not sure this logic is correct, what about sight blocking but movement non-blocking tiles, example magical darkness?
                 wall = game_map.tiles[x][y].block_sight
+                door = game_map.tiles[x][y].door
                 floodfill_done = game_map.tiles[x][y].floodfilled
                 #If it's visible make it light colored and mark explored
                 if visible:
                     if wall:
-                        tcod.console_set_char_background(source_con, x, y, kolors['light_wall'], tcod.BKGND_SET)
+                        tcod.console_put_char_ex(source_con, x, y, 35, kolors['console_white'], kolors['light_wall'])
                     else:
-                        tcod.console_set_char_background(source_con, x, y, kolors['light_ground'], tcod.BKGND_SET)
+                        if door:
+                            tcod.console_put_char_ex(source_con, x, y, 43, kolors['console_white'], kolors['dark_wall'])
+                        else:
+                            tcod.console_set_char_background(source_con, x, y, kolors['light_ground'], tcod.BKGND_SET)
                     #Mark tiles as explored
                     game_map.tiles[x][y].explored = True
                 #If it is not visible but is explored make it dark colored
