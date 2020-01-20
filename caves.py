@@ -8,6 +8,7 @@ from fighter import Fighter
 from item import Item
 from ai import BasicMonster
 from entity import Entity
+from item_functions import heal
 from render_functions import RenderOrder
 from generator import gen_monster, roll_monster
 
@@ -299,7 +300,7 @@ class Cave(GameMap):
 
             if not any([entity for entity in entities if entity.x == x and entity.y == y]):
                 #Create the item entity
-                item_component = Item()
+                item_component = Item(use_function=heal, amount=4)
                 item = Entity(x, y, '!', kolors['potion_violet'], 'Healing Potion', render_order=RenderOrder.ITEM, item=item_component)
 
                 #Append the item to the list of entities

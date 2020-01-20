@@ -130,9 +130,8 @@ class Dungeon(GameMap):
             edge_tiles = room.edge()
             for cur_tile in edge_tiles:
                 (x, y) = cur_tile
-                if self.tiles[x][y].blocked == False:
-                    print("Door")
-                    self.tiles[x][y].door == True
+                #if self.tiles[x][y].blocked == False:
+                self.tiles[x][y].door = True
         #Thanks to aotdev from the roguelikedev forum for the basic idea
         #Mine is implemented differently to avoid boundary issues
         elif room.room_type == "hexagon":
@@ -195,9 +194,16 @@ class Dungeon(GameMap):
         number_of_items = randint(0, max_items_per_area)
 
         for i in range(0, number_of_monsters):
-            # Choose a random location in the area
-            x = randint(area.x1 + 1, area.x2 - 1)
-            y = randint(area.y1 + 1, area.y2 - 1)
+            #This and the one for items should be a function
+            tile_clear = False
+            x = 0
+            y = 0
+            while tile_clear != True:
+                # Choose a random location in the area
+                x = randint(area.x1 + 1, area.x2 - 1)
+                y = randint(area.y1 + 1, area.y2 - 1)
+                if self.tiles[x][y].blocked == False:
+                    tile_clear = True
 
             if not any([entity for entity in entities if entity.x == x and entity.y == y]):
                 #Roll for what monster to populate
@@ -215,9 +221,16 @@ class Dungeon(GameMap):
                 entities.append(monster)
 
         for i in range(0, number_of_items):
-            # Choose a random location in the area
-            x = randint(area.x1 + 1, area.x2 - 1)
-            y = randint(area.y1 + 1, area.y2 - 1)
+            #This and the one for monsters should be a function
+            tile_clear = False
+            x = 0
+            y = 0
+            while tile_clear != True:
+                # Choose a random location in the area
+                x = randint(area.x1 + 1, area.x2 - 1)
+                y = randint(area.y1 + 1, area.y2 - 1)
+                if self.tiles[x][y].blocked == False:
+                    tile_clear = True
 
             if not any([entity for entity in entities if entity.x == x and entity.y == y]):
                 #Create the item entity
