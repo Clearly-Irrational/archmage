@@ -6,10 +6,11 @@ class Palette:
             #indoors
             'dark_wall': Color(0, 0, 100),
             'dark_ground': Color(50, 50, 150),
-            'door': Color(127, 101, 63),
+            'dark_door': Color(63, 50, 31),
             #'light_wall': Color(130, 110, 50),
             'light_wall': Color(0, 0, 250),
             'light_ground': Color(200, 180, 50),
+            'light_door': Color(127, 101, 63),
             'purple_fill': Color(128, 0, 128),
             #outdoors
             'light_water': Color(0, 0, 255), #Blue

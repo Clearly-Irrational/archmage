@@ -100,7 +100,7 @@ def render_all_indoors(source_con, dest_con, panel_con, entities_list, player, g
             for x in range(game_map.width):
                 visible = tcod.map_is_in_fov(fov_map, x, y)
                 #not sure this logic is correct, what about sight blocking but movement non-blocking tiles, example magical darkness?
-                wall = game_map.tiles[x][y].block_sight
+                wall = game_map.tiles[x][y].block_sight and game_map.tiles[x][y].blocked
                 door = game_map.tiles[x][y].door
                 floodfill_done = game_map.tiles[x][y].floodfilled
                 #If it's visible make it light colored and mark explored
@@ -109,21 +109,19 @@ def render_all_indoors(source_con, dest_con, panel_con, entities_list, player, g
                         tcod.console_put_char_ex(source_con, x, y, 35, kolors['console_white'], kolors['light_wall'])
                     else:
                         if door:
-                            tcod.console_put_char_ex(source_con, x, y, 43, kolors['console_white'], kolors['door'])
+                            tcod.console_put_char_ex(source_con, x, y, 43, kolors['console_white'], kolors['light_door'])
                         else:
                             tcod.console_set_char_background(source_con, x, y, kolors['light_ground'], tcod.BKGND_SET)
                     #Mark tiles as explored
                     game_map.tiles[x][y].explored = True
                 #If it is not visible but is explored make it dark colored
                 elif game_map.tiles[x][y].explored or game_type == 'viewer':
-#                    if wall:
-#                        tcod.console_set_char_background(source_con, x, y, kolors['dark_wall'], tcod.BKGND_SET)
-#                    elif floodfill_done:
-#                        tcod.console_set_char_background(source_con, x, y, kolors['purple_fill'], tcod.BKGND_SET)
                     if floodfill_done:
                         tcod.console_set_char_background(source_con, x, y, kolors['purple_fill'], tcod.BKGND_SET)
                     elif wall:
                         tcod.console_set_char_background(source_con, x, y, kolors['dark_wall'], tcod.BKGND_SET)
+                    elif door:
+                        tcod.console_set_char_background(source_con, x, y, kolors['dark_door'], tcod.BKGND_SET)
                     else:
                         tcod.console_set_char_background(source_con, x, y, kolors['dark_ground'], tcod.BKGND_SET)
 

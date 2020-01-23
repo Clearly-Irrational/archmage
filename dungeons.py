@@ -39,7 +39,6 @@ class Dungeon(GameMap):
                 y = randint(0, map_height - h - 1)
                 #Create new rectangular room
                 new_room = Rect(x, y, w, h)
-                #print(new_room.edge())
             else:
                 h = randrange(8, 14, 2)
                 w = int(h * 1.3)  #Fat hexagons look better than 1.1547 true
@@ -118,6 +117,28 @@ class Dungeon(GameMap):
                     if tunnel_built == True:
                         break
 
+        #Create doors
+        for cur_room in range(0, len(rooms)):
+            if rooms[cur_room].room_type == "rectangle":
+                edge_tiles = rooms[cur_room].edge()
+                for cur_tile in edge_tiles:
+                    (x, y) = cur_tile
+                    north, south, west, east = True, True, True, True
+                    if ((y-1) >= 0):
+                        north = self.tiles[x][y-1].blocked
+                    if ((y+1) < map_height):
+                        south = self.tiles[x][y+1].blocked
+                    if ((x-1) >= 0):
+                        west = self.tiles[x-1][y].blocked
+                    if ((x+1) < map_width):
+                        east = self.tiles[x+1][y].blocked
+                    #If it's a true door then mark it
+                    #The ^ syntax is a bitwise xor
+                    if (not (north and south)) ^ (not (west and east)):
+                        if self.tiles[x][y].blocked == False:
+                            self.tiles[x][y].door = True
+                            self.tiles[x][y].block_sight = True
+
     #Generate a walkable rectangular or hexagonal room
     def create_room(self, room):
         if room.room_type == "rectangle":
@@ -127,11 +148,6 @@ class Dungeon(GameMap):
                 for y in range(room.y1 + 1, room.y2):
                     self.tiles[x][y].blocked = False
                     self.tiles[x][y].block_sight = False
-            edge_tiles = room.edge()
-            for cur_tile in edge_tiles:
-                (x, y) = cur_tile
-                #if self.tiles[x][y].blocked == False:
-                self.tiles[x][y].door = True
         #Thanks to aotdev from the roguelikedev forum for the basic idea
         #Mine is implemented differently to avoid boundary issues
         elif room.room_type == "hexagon":
