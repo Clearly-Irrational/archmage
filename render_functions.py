@@ -121,7 +121,8 @@ def render_all_indoors(source_con, dest_con, panel_con, entities_list, player, g
                     elif wall:
                         tcod.console_set_char_background(source_con, x, y, kolors['dark_wall'], tcod.BKGND_SET)
                     elif door:
-                        tcod.console_set_char_background(source_con, x, y, kolors['dark_door'], tcod.BKGND_SET)
+                        tcod.console_put_char_ex(source_con, x, y, 43, kolors['console_white'], kolors['dark_door'])
+                        #tcod.console_set_char_background(source_con, x, y, kolors['dark_door'], tcod.BKGND_SET)
                     else:
                         tcod.console_set_char_background(source_con, x, y, kolors['dark_ground'], tcod.BKGND_SET)
 

@@ -10,7 +10,7 @@ def third_eye(state, color_palette, indoors):
             return interface_skin
         elif state == 'close_eye':
             interface_skin = 'Tutorial'
-            color_palette.set_color('light_wall', 130, 110, 50)
+            color_palette.set_color('light_wall', 0, 0, 250)
             color_palette.set_color('light_ground', 200, 180, 50)
             color_palette.set_color('dark_wall', 0, 0, 100)
             color_palette.set_color('dark_ground', 50, 50, 150)

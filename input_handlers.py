@@ -7,6 +7,8 @@ def handle_keys(event, mod_key, game_state):
         return handle_player_turn_keys(event, mod_key)
     elif game_state == GameStates.PLAYER_DEAD:
         return handle_player_dead_keys(event, mod_key)
+    elif game_state == GameStates.TARGETING:
+        return handle_targeting_keys(event, mod_key)
     elif game_state in (GameStates.SHOW_INVENTORY, GameStates.DROP_INVENTORY):
         return handle_inventory_keys(event, mod_key)
 
@@ -54,6 +56,14 @@ def handle_player_turn_keys(event, mod_key):
         #Somehow we got here even though no key was pressed
         return {'error': "handle_keys - no key pressed"}
 
+def handle_targeting_keys(event, mod_key):
+    keypress = event.sym
+
+    if keypress == 27: #esc exit
+        return {'exit': 'menu'}
+
+    return {}
+
 def handle_player_dead_keys(event, mod_key):
     keypress = event.sym
 
@@ -73,5 +83,15 @@ def handle_inventory_keys(event, mod_key):
 
     if keypress == 27: #esc exit
         return {'exit': 'menu'}
+
+    return {}
+
+def handle_mouse(mouse, button):
+    (x, y) = (mouse[0], mouse[1])
+
+    if button == 1:
+        return {'left_click': (x, y)}
+    elif button == 3:
+        return {'right_click': (x, y)}
 
     return {} 

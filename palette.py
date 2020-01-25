@@ -30,6 +30,7 @@ class Palette:
             'tree_green': Color(0, 63, 0), #Green
             #Entities
             'console_white': Color(255, 255, 255),
+            'targeting_cyan': Color(0, 255, 255),
             'ape_c_white': Color(230, 230, 230),
             'orc_green': Color(63, 127, 63),
             'troll_green': Color(0, 127, 0),
@@ -38,7 +39,8 @@ class Palette:
             'zombie_black': Color(0, 0, 0),
             'ghoul_green': Color(63, 127, 63),
             'banshee_blue': Color(0, 0, 127),
-            'potion_violet': Color(127, 0, 255)
+            'potion_violet': Color(127, 0, 255),
+            'scroll_amber': Color(255, 232, 165)
         }
 
     def get_colors(self):

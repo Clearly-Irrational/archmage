@@ -7,7 +7,7 @@ from death_functions import kill_monster, kill_player
 from entity import Entity, get_blocking_entities_at_location
 from fov_functions import initialize_fov, recompute_fov
 from game_states import GameStates
-from input_handlers import handle_keys
+from input_handlers import handle_keys, handle_mouse
 from initialize import get_constants
 from palette import Palette
 from game_map import GameMap
@@ -66,7 +66,7 @@ def main():
         color_palette.set_color('dark_wall', 70, 130, 180)
         color_palette.set_color('dark_ground', 70, 130, 180)
 
-    map_type = 'Dungeon' #Choices: Dungeon, Cave, World
+    map_type = 'Cave' #Choices: Dungeon, Cave, World
 
     if map_type == 'Dungeon':
         indoors = True
@@ -84,7 +84,7 @@ def main():
     #Initialize FOV and calculate on start
     fov_recompute = True
     fov_map = initialize_fov(game_map)
-    game_type = 'normal' #choices normal, viewer
+    game_type = 'viewer' #choices normal, viewer
 
     #Initialize the message log
     message_log = MessageLog(constants['message_x'], constants['message_width'], constants['message_height'])
@@ -92,6 +92,7 @@ def main():
     #Initialize main loop
     game_state = GameStates.PLAYERS_TURN
     previous_game_state = game_state
+    targeting_item = None
     end_game = False
     while not end_game:
         #Recomput FOV if necessary
@@ -110,6 +111,7 @@ def main():
 
         #initialize loop variables
         action = {'none': True}
+        mouse_action = {'none': True}
 
         #Detect and handle events
         for event in tcod.event.get():
@@ -123,6 +125,9 @@ def main():
                 action = handle_keys(event, mod_key, game_state)
             elif event.type == "MOUSEMOTION": #Mouse was moved
                 mouse = event.tile
+            elif event.type == "MOUSEBUTTONDOWN":
+                mouse = event.tile
+                mouse_action = handle_mouse(mouse, event.button)
             #else:
                 #print(event)
 
@@ -137,6 +142,8 @@ def main():
         error = action.get('error')
         wait = action.get('wait')
         vision = action.get('vision')
+        left_click = mouse_action.get('left_click')
+        right_click = mouse_action.get('right_click')
 
         #List to store the results of damage
         player_turn_results = []
@@ -180,13 +187,23 @@ def main():
                 player.inventory.items):
             item = player.inventory.items[inventory_index]
             if game_state == GameStates.SHOW_INVENTORY:
-                player_turn_results.extend(player.inventory.use(item))
+                player_turn_results.extend(player.inventory.use(item, entities=entities, fov_map=fov_map))
             elif game_state == GameStates.DROP_INVENTORY:
                 player_turn_results.extend(player.inventory.drop_item(item))
+
+        if game_state == GameStates.TARGETING:
+            if left_click:
+                target_x, target_y = left_click
+                item_use_results = player.inventory.use(targeting_item, entities=entities, fov_map=fov_map, target_x=target_x, target_y=target_y)
+                player_turn_results.extend(item_use_results)
+            elif right_click:
+                player_turn_results.append({'targeting_cancelled': True})
 
         if exit:
             if exit == 'menu' and game_state in (GameStates.SHOW_INVENTORY, GameStates.DROP_INVENTORY):
                 game_state = previous_game_state
+            elif game_state == GameStates.TARGETING:
+                player_turn_results.append({'targeting_cancelled': True})
             else:
                 if exit == True:
                     end_game = True
@@ -222,9 +239,15 @@ def main():
             item_added = player_turn_result.get('item_added')
             item_consumed = player_turn_result.get('consumed')
             item_dropped = player_turn_result.get('item_dropped')
+            targeting = player_turn_result.get('targeting')
+            targeting_cancelled = player_turn_result.get('targeting_cancelled')
 
             if message:
                 message_log.add_message(message)
+
+            if targeting_cancelled:
+                game_state = previous_game_state
+                message_log.add_message(Message('Targeting cancelled'))
 
             if dead_entity:
                 if dead_entity == player:
@@ -240,6 +263,12 @@ def main():
 
             if item_consumed:
                 game_state = GameStates.ENEMY_TURN
+
+            if targeting:
+                previous_game_state = GameStates.PLAYERS_TURN
+                game_state = GameStates.TARGETING
+                targeting_item = targeting
+                message_log.add_message(targeting_item.item.targeting_message)
 
             if item_dropped:
                 entities.append(item_dropped)
