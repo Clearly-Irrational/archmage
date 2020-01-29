@@ -1,8 +1,8 @@
 import tcod
 
 def get_constants():
-    screen_width = 160 #Default 80
-    screen_height = 100 #Default 50
+    screen_width = 136 #Default 80
+    screen_height = 82 #Default 50
     screen_title = 'Archmage - The True Path'
     screen_fullscreen = False
     screen_renderer = tcod.RENDERER_SDL2

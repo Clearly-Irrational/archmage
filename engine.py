@@ -35,7 +35,7 @@ def main():
     current_mm = cr.get_monster_manual()
 
     #Set the font file and settings
-    font_file = 'font_arial10x10.png'
+    font_file = 'fonts/font_arial12x12.png'
     tcod.console_set_custom_font(font_file, tcod.FONT_TYPE_GREYSCALE | tcod.FONT_LAYOUT_TCOD)
     tcod.console_map_ascii_codes_to_font(256, 32, 0, 1)  #map all characters in 2nd row
     tcod.console_map_ascii_codes_to_font(256+32, 32, 0, 2)  #map all characters in 3rd row
@@ -84,7 +84,7 @@ def main():
     #Initialize FOV and calculate on start
     fov_recompute = True
     fov_map = initialize_fov(game_map)
-    game_type = 'viewer' #choices normal, viewer
+    game_type = 'normal' #choices normal, viewer
 
     #Initialize the message log
     message_log = MessageLog(constants['message_x'], constants['message_width'], constants['message_height'])
