@@ -1,4 +1,4 @@
-from random import randint
+from random import randint, choice
 import random
 from math import sqrt
 
@@ -63,7 +63,7 @@ class Cave(GameMap):
                 player.y = rand_y
                 placed = True
 
-        #Add monsters
+        #Add monsters and items
         for cur_cave in self.caves:
             self.place_entities(cur_cave, entities, max_monsters_per_area, max_items_per_area, kolors, current_roster, current_mm)
 
@@ -277,6 +277,8 @@ class Cave(GameMap):
         number_of_items = randint(0, max_items_per_area)
             
         for i in range(0, number_of_monsters):
+            #This pulls the first coord from the set, seems good enough but not
+            #fully random
             for coord in area: break #Get an element from area
             (x, y) = coord
 
@@ -296,7 +298,8 @@ class Cave(GameMap):
                 entities.append(monster)
 
         for i in range(0, number_of_items):
-            for coord in area: break #Get an element from area
+            #Select a random tile instead of the same tile as coord in area
+            coord = random.choice(tuple(area))
             (x, y) = coord
 
             if not any([entity for entity in entities if entity.x == x and entity.y == y]):
@@ -314,6 +317,5 @@ class Cave(GameMap):
                 else:
                     item_component = Item(use_function=cast_lightning, damage=20, maximum_range=5)
                     item = Entity(x, y, '?', kolors['scroll_amber'], 'Lightning Scroll', render_order=RenderOrder.ITEM, item=item_component)
-
                 #Append the item to the list of entities
                 entities.append(item)
