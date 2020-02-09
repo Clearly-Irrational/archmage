@@ -1,23 +1,20 @@
 import tcod
 import tcod.event
 
-from fighter import Fighter
-from inventory import Inventory
 from death_functions import kill_monster, kill_player
-from entity import Entity, get_blocking_entities_at_location
+from entity import get_blocking_entities_at_location
 from fov_functions import initialize_fov, recompute_fov
 from game_states import GameStates
 from input_handlers import handle_keys, handle_mouse
-from initialize import get_constants
+from initialize import get_constants, get_game_variables
 from palette import Palette
-from game_map import GameMap
-from render_functions import clear_all, render_all, RenderOrder
+from render_functions import clear_all, render_all
 from caves import Cave
 from dungeons import Dungeon
 from world import World
 from vision import third_eye
 from generator import RosterLists
-from game_messages import Message, MessageLog
+from game_messages import Message
 
 def main():
     #Set the initial variables
@@ -35,8 +32,7 @@ def main():
     current_mm = cr.get_monster_manual()
 
     #Set the font file and settings
-    font_file = 'fonts/font_arial12x12.png'
-    tcod.console_set_custom_font(font_file, tcod.FONT_TYPE_GREYSCALE | tcod.FONT_LAYOUT_TCOD)
+    tcod.console_set_custom_font(constants['font_file'], tcod.FONT_TYPE_GREYSCALE | tcod.FONT_LAYOUT_TCOD)
     tcod.console_map_ascii_codes_to_font(256, 32, 0, 1)  #map all characters in 2nd row
     tcod.console_map_ascii_codes_to_font(256+32, 32, 0, 2)  #map all characters in 3rd row
 
@@ -49,16 +45,8 @@ def main():
     #Create panel console for the hp bar and message log
     panel_con = tcod.console.Console(constants['screen_width'], constants['panel_height'], constants['screen_order'])
 
-    #Initialize entities
-    fighter_component = Fighter(hp=30, protection=2, power=5)
-    inventory_component = Inventory(26)
-    player = Entity(0, 0, '@', tcod.black, 'Player', blocks=True, render_order=RenderOrder.ACTOR, fighter=fighter_component, inventory=inventory_component)
-    entities = [player]
-
-    #Initialize the map
-    fov_algorithm = 0
-    fov_light_walls = True
-    fov_radius = 10
+    #Initialize player, entities, game_map
+    player, entities, game_map, indoors, message_log, game_state = get_game_variables(constants, kolors, current_roster, current_mm)
 
     interface_skin = 'Tutorial' #Choices: Graph, Tutorial
 
@@ -66,38 +54,23 @@ def main():
         color_palette.set_color('dark_wall', 70, 130, 180)
         color_palette.set_color('dark_ground', 70, 130, 180)
 
-    map_type = 'Cave' #Choices: Dungeon, Cave, World
-
-    if map_type == 'Dungeon':
-        indoors = True
-        game_map = Dungeon(constants['map_width'], constants['map_height'])
-        game_map.make_map(constants['max_rooms'], constants['room_min_size'], constants['room_max_size'], constants['map_width'], constants['map_height'], player, entities, constants['max_monsters_per_room'], constants['max_items_per_room'], kolors, current_roster, current_mm)
-    elif map_type == 'Cave':
-        indoors = True
-        game_map = Cave(constants['map_width'], constants['map_height'])
-        game_map.make_cave(constants['map_width'], constants['map_height'], player, entities, constants['max_monsters_per_cave'], constants['max_items_per_cave'], kolors, current_roster, current_mm)
-    elif map_type == 'World':
-        indoors = False
-        game_map = World(constants['map_width'], constants['map_height'])
-        game_map.make_world(constants['map_width'], constants['map_height'], player, entities, constants['max_monsters_per_spawn'], kolors, current_roster, current_mm)
-
     #Initialize FOV and calculate on start
     fov_recompute = True
     fov_map = initialize_fov(game_map)
     game_type = 'normal' #choices normal, viewer
 
     #Initialize the message log
-    message_log = MessageLog(constants['message_x'], constants['message_width'], constants['message_height'])
+#    message_log = MessageLog(constants['message_x'], constants['message_width'], constants['message_height'])
 
     #Initialize main loop
-    game_state = GameStates.PLAYERS_TURN
+#    game_state = GameStates.PLAYERS_TURN
     previous_game_state = game_state
     targeting_item = None
     end_game = False
     while not end_game:
         #Recomput FOV if necessary
         if fov_recompute:
-            recompute_fov(fov_map, player.x, player.y, fov_radius, fov_light_walls, fov_algorithm)
+            recompute_fov(fov_map, player.x, player.y, constants['fov_radius'], constants['fov_light_walls'], constants['fov_algorithm'])
 
         #Render all entities & tiles on main console and blit them to the root console
         render_all(main_con, root_con, panel_con, entities, player, game_map, fov_map, fov_recompute, message_log, constants['screen_width'], constants['screen_height'], kolors, game_type, interface_skin, indoors, constants['hp_bar_width'], constants['panel_height'], constants['panel_y'], mouse, game_state)

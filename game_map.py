@@ -1,6 +1,5 @@
 from random import randint
 
-from initialize import get_constants
 from tile import Tile
 
 class GameMap:
